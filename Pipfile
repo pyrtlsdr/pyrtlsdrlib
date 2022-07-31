@@ -1,0 +1,19 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+pyrlsdrlib = {editable = true, path = "."}
+
+[dev-packages]
+pygithub = "*"
+ipython = "*"
+requests = "*"
+loguru = "*"
+build = "*"
+json-object-factory = "*"
+click = "*"
+
+[requires]
+python_version = "3.8"

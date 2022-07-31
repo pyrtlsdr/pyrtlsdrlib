@@ -1,0 +1,214 @@
+{
+  "macos_latest_build.zip": {
+    "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr.0.8git.dylib": {
+      "tag_name": "v0.8.0",
+      "build_file": {
+        "__class__": "pyrtlsdrlib.common.BuildFile",
+        "build_type": {
+          "__class__": "pyrtlsdrlib.common.BuildType",
+          "value": "macos"
+        },
+        "file_type": {
+          "__class__": "pyrtlsdrlib.common.FileType",
+          "value": "lib"
+        },
+        "filename": {
+          "__class__": "pathlib.Path",
+          "value": "build_assets/macos/lib/librtlsdr.0.8git.dylib"
+        },
+        "is_symlink": false,
+        "symlink_target": null
+      },
+      "proj_file": {
+        "__class__": "pathlib.Path",
+        "value": "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr.0.8git.dylib"
+      }
+    },
+    "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr.0.dylib": {
+      "tag_name": "v0.8.0",
+      "build_file": {
+        "__class__": "pyrtlsdrlib.common.BuildFile",
+        "build_type": {
+          "__class__": "pyrtlsdrlib.common.BuildType",
+          "value": "macos"
+        },
+        "file_type": {
+          "__class__": "pyrtlsdrlib.common.FileType",
+          "value": "lib"
+        },
+        "filename": {
+          "__class__": "pathlib.Path",
+          "value": "build_assets/macos/lib/librtlsdr.0.dylib"
+        },
+        "is_symlink": true,
+        "symlink_target": {
+          "__class__": "pathlib.Path",
+          "value": "build_assets/macos/lib/librtlsdr.0.8git.dylib"
+        }
+      },
+      "proj_file": {
+        "__class__": "pathlib.Path",
+        "value": "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr.0.dylib"
+      }
+    },
+    "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr.dylib": {
+      "tag_name": "v0.8.0",
+      "build_file": {
+        "__class__": "pyrtlsdrlib.common.BuildFile",
+        "build_type": {
+          "__class__": "pyrtlsdrlib.common.BuildType",
+          "value": "macos"
+        },
+        "file_type": {
+          "__class__": "pyrtlsdrlib.common.FileType",
+          "value": "lib"
+        },
+        "filename": {
+          "__class__": "pathlib.Path",
+          "value": "build_assets/macos/lib/librtlsdr.dylib"
+        },
+        "is_symlink": true,
+        "symlink_target": {
+          "__class__": "pathlib.Path",
+          "value": "build_assets/macos/lib/librtlsdr.0.8git.dylib"
+        }
+      },
+      "proj_file": {
+        "__class__": "pathlib.Path",
+        "value": "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr.dylib"
+      }
+    }
+  },
+  "rtlsdr-bin-w32_static.zip": {
+    "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr_w32_static.dll": {
+      "tag_name": "v0.8.0",
+      "build_file": {
+        "__class__": "pyrtlsdrlib.common.BuildFile",
+        "build_type": {
+          "__class__": "pyrtlsdrlib.common.BuildType",
+          "value": "windows|w32|static"
+        },
+        "file_type": {
+          "__class__": "pyrtlsdrlib.common.FileType",
+          "value": "lib"
+        },
+        "filename": {
+          "__class__": "pathlib.Path",
+          "value": "build_assets/windows_w32_static/lib/librtlsdr.dll"
+        },
+        "is_symlink": false,
+        "symlink_target": null
+      },
+      "proj_file": {
+        "__class__": "pathlib.Path",
+        "value": "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr_w32_static.dll"
+      }
+    }
+  },
+  "rtlsdr-bin-w64_static.zip": {
+    "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr_w64_static.dll": {
+      "tag_name": "v0.8.0",
+      "build_file": {
+        "__class__": "pyrtlsdrlib.common.BuildFile",
+        "build_type": {
+          "__class__": "pyrtlsdrlib.common.BuildType",
+          "value": "windows|w64|static"
+        },
+        "file_type": {
+          "__class__": "pyrtlsdrlib.common.FileType",
+          "value": "lib"
+        },
+        "filename": {
+          "__class__": "pathlib.Path",
+          "value": "build_assets/windows_w64_static/lib/librtlsdr.dll"
+        },
+        "is_symlink": false,
+        "symlink_target": null
+      },
+      "proj_file": {
+        "__class__": "pathlib.Path",
+        "value": "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr_w64_static.dll"
+      }
+    }
+  },
+  "ubuntu_latest_build.zip": {
+    "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr.so.0.8git": {
+      "tag_name": "v0.8.0",
+      "build_file": {
+        "__class__": "pyrtlsdrlib.common.BuildFile",
+        "build_type": {
+          "__class__": "pyrtlsdrlib.common.BuildType",
+          "value": "ubuntu"
+        },
+        "file_type": {
+          "__class__": "pyrtlsdrlib.common.FileType",
+          "value": "lib"
+        },
+        "filename": {
+          "__class__": "pathlib.Path",
+          "value": "build_assets/ubuntu/lib/librtlsdr.so.0.8git"
+        },
+        "is_symlink": false,
+        "symlink_target": null
+      },
+      "proj_file": {
+        "__class__": "pathlib.Path",
+        "value": "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr.so.0.8git"
+      }
+    },
+    "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr.so": {
+      "tag_name": "v0.8.0",
+      "build_file": {
+        "__class__": "pyrtlsdrlib.common.BuildFile",
+        "build_type": {
+          "__class__": "pyrtlsdrlib.common.BuildType",
+          "value": "ubuntu"
+        },
+        "file_type": {
+          "__class__": "pyrtlsdrlib.common.FileType",
+          "value": "lib"
+        },
+        "filename": {
+          "__class__": "pathlib.Path",
+          "value": "build_assets/ubuntu/lib/librtlsdr.so"
+        },
+        "is_symlink": true,
+        "symlink_target": {
+          "__class__": "pathlib.Path",
+          "value": "build_assets/ubuntu/lib/librtlsdr.so.0.8git"
+        }
+      },
+      "proj_file": {
+        "__class__": "pathlib.Path",
+        "value": "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr.so"
+      }
+    },
+    "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr.so.0": {
+      "tag_name": "v0.8.0",
+      "build_file": {
+        "__class__": "pyrtlsdrlib.common.BuildFile",
+        "build_type": {
+          "__class__": "pyrtlsdrlib.common.BuildType",
+          "value": "ubuntu"
+        },
+        "file_type": {
+          "__class__": "pyrtlsdrlib.common.FileType",
+          "value": "lib"
+        },
+        "filename": {
+          "__class__": "pathlib.Path",
+          "value": "build_assets/ubuntu/lib/librtlsdr.so.0"
+        },
+        "is_symlink": true,
+        "symlink_target": {
+          "__class__": "pathlib.Path",
+          "value": "build_assets/ubuntu/lib/librtlsdr.so.0.8git"
+        }
+      },
+      "proj_file": {
+        "__class__": "pathlib.Path",
+        "value": "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr.so.0"
+      }
+    }
+  }
+}
