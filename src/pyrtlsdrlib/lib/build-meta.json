@@ -1,6 +1,6 @@
 {
   "macos_latest_build.zip": {
-    "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr.0.8git.dylib": {
+    "librtlsdr.0.8git.dylib": {
       "tag_name": "v0.8.0",
       "build_file": {
         "__class__": "pyrtlsdrlib.common.BuildFile",
@@ -21,10 +21,10 @@
       },
       "proj_file": {
         "__class__": "pathlib.Path",
-        "value": "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr.0.8git.dylib"
+        "value": "librtlsdr.0.8git.dylib"
       }
     },
-    "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr.0.dylib": {
+    "librtlsdr.0.dylib": {
       "tag_name": "v0.8.0",
       "build_file": {
         "__class__": "pyrtlsdrlib.common.BuildFile",
@@ -48,10 +48,10 @@
       },
       "proj_file": {
         "__class__": "pathlib.Path",
-        "value": "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr.0.dylib"
+        "value": "librtlsdr.0.dylib"
       }
     },
-    "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr.dylib": {
+    "librtlsdr.dylib": {
       "tag_name": "v0.8.0",
       "build_file": {
         "__class__": "pyrtlsdrlib.common.BuildFile",
@@ -75,12 +75,12 @@
       },
       "proj_file": {
         "__class__": "pathlib.Path",
-        "value": "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr.dylib"
+        "value": "librtlsdr.dylib"
       }
     }
   },
   "rtlsdr-bin-w32_static.zip": {
-    "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr_w32_static.dll": {
+    "librtlsdr_w32_static.dll": {
       "tag_name": "v0.8.0",
       "build_file": {
         "__class__": "pyrtlsdrlib.common.BuildFile",
@@ -101,12 +101,12 @@
       },
       "proj_file": {
         "__class__": "pathlib.Path",
-        "value": "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr_w32_static.dll"
+        "value": "librtlsdr_w32_static.dll"
       }
     }
   },
   "rtlsdr-bin-w64_static.zip": {
-    "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr_w64_static.dll": {
+    "librtlsdr_w64_static.dll": {
       "tag_name": "v0.8.0",
       "build_file": {
         "__class__": "pyrtlsdrlib.common.BuildFile",
@@ -127,12 +127,12 @@
       },
       "proj_file": {
         "__class__": "pathlib.Path",
-        "value": "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr_w64_static.dll"
+        "value": "librtlsdr_w64_static.dll"
       }
     }
   },
   "ubuntu_latest_build.zip": {
-    "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr.so.0.8git": {
+    "librtlsdr.so.0.8git": {
       "tag_name": "v0.8.0",
       "build_file": {
         "__class__": "pyrtlsdrlib.common.BuildFile",
@@ -153,10 +153,10 @@
       },
       "proj_file": {
         "__class__": "pathlib.Path",
-        "value": "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr.so.0.8git"
+        "value": "librtlsdr.so.0.8git"
       }
     },
-    "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr.so": {
+    "librtlsdr.so": {
       "tag_name": "v0.8.0",
       "build_file": {
         "__class__": "pyrtlsdrlib.common.BuildFile",
@@ -180,10 +180,10 @@
       },
       "proj_file": {
         "__class__": "pathlib.Path",
-        "value": "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr.so"
+        "value": "librtlsdr.so"
       }
     },
-    "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr.so.0": {
+    "librtlsdr.so.0": {
       "tag_name": "v0.8.0",
       "build_file": {
         "__class__": "pyrtlsdrlib.common.BuildFile",
@@ -207,7 +207,7 @@
       },
       "proj_file": {
         "__class__": "pathlib.Path",
-        "value": "/home/nocarrier/programs/pyrtlsdr-library/src/pyrtlsdrlib/lib/librtlsdr.so.0"
+        "value": "librtlsdr.so.0"
       }
     }
   }

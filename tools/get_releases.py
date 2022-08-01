@@ -533,7 +533,8 @@ def copy_builds_to_project(build_dir: Path = BUILD_DIR, dest_dir: Path = PROJECT
         proj_asset = project_meta[asset_name]
         for data in proj_asset.values():
             needs_update = False
-            if not data['proj_file'].exists():
+            proj_file = dest_dir / data['proj_file']
+            if not proj_file.exists():
                 needs_update = True
             elif data['tag_name'] != asset_data['tag_name']:
                 needs_update = True
@@ -575,10 +576,11 @@ def copy_builds_to_project(build_dir: Path = BUILD_DIR, dest_dir: Path = PROJECT
                 continue
             logger.debug(f'copying {f.filename} to {dest_fn}')
             shutil.copy2(f.filename, dest_fn)
-            _updates[str(dest_fn)] = dict(
+            dest_fn_rel = dest_fn.relative_to(dest_dir)
+            _updates[str(dest_fn_rel)] = dict(
                 tag_name=asset_data['tag_name'],
                 build_file=f,
-                proj_file=dest_fn,
+                proj_file=dest_fn_rel,
             )
 
         for f, dest_fn in symlinks:
@@ -591,10 +593,11 @@ def copy_builds_to_project(build_dir: Path = BUILD_DIR, dest_dir: Path = PROJECT
                 dest_fn.unlink()
             dest_fn.symlink_to(symlink_rel)
             assert dest_fn.resolve() == symlink_target != dest_fn
-            _updates[str(dest_fn)] = dict(
+            dest_fn_rel = dest_fn.relative_to(dest_dir)
+            _updates[str(dest_fn_rel)] = dict(
                 tag_name=asset_data['tag_name'],
                 build_file=f,
-                proj_file=dest_fn,
+                proj_file=dest_fn_rel,
             )
         _num_updates = len(_updates)
         if _num_updates:
