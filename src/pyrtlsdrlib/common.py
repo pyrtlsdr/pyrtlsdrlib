@@ -6,8 +6,6 @@ import dataclasses
 from dataclasses import dataclass
 from pathlib import Path
 
-from loguru import logger
-
 __all__ = ('BuildType', 'FileType', 'BuildFile')
 
 class BuildType(enum.Flag):
