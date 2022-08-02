@@ -42,6 +42,9 @@ def normalize_filenames(infiles: tp.Sequence[BuildFile]):
         if f.filename.is_absolute():
             fn = f.filename.relative_to(ROOT_DIR)
             f.filename = fn
+        if f.is_symlink and f.symlink_target.is_absolute():
+            fn = f.symlink_target.relative_to(ROOT_DIR)
+            f.symlink_target = fn
 
 
 class ObjBase:
