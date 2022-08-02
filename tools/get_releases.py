@@ -4,6 +4,7 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
+import dataclasses
 import functools
 
 try:
@@ -37,14 +38,32 @@ from common import *
 from build_from_source import Builder
 
 
-def normalize_filenames(infiles: tp.Sequence[BuildFile]):
-    for f in infiles:
+def normalize_filenames_inplace(
+    infiles: tp.Sequence[BuildFile]|tp.Dict[tp.Any, BuildFile],
+    rel_dir: Path,
+):
+    if isinstance(infiles, dict):
+        it = infiles.values()
+    else:
+        it = infiles
+    for f in it:
         if f.filename.is_absolute():
-            fn = f.filename.relative_to(ROOT_DIR)
+            fn = f.filename.relative_to(rel_dir)
             f.filename = fn
         if f.is_symlink and f.symlink_target.is_absolute():
-            fn = f.symlink_target.relative_to(ROOT_DIR)
+            fn = f.symlink_target.relative_to(rel_dir)
             f.symlink_target = fn
+
+def normalize_filenames_copy(
+    infiles: tp.Sequence[BuildFile]|tp.Dict[tp.Any, BuildFile],
+    rel_dir: Path,
+) -> tp.Sequence[BuildFile]|tp.Dict[tp.Any, BuildFile]:
+    if isinstance(infiles, dict):
+        result = {k:dataclasses.replace(v) for k,v in infiles}
+    else:
+        result = [dataclasses.replace(v) for v in infiles]
+    normalize_filenames_inplace(result, rel_dir)
+    return result
 
 
 class ObjBase:
@@ -377,8 +396,6 @@ class AssetBase(ObjBase):
                 build_file.filename.symlink_to(symlink_rel)
                 results.append(build_file)
 
-        normalize_filenames(results)
-
         logger.debug('Writing build metadata')
         self.files_updated = True
         self.write_metadata(dest_dir)
@@ -520,6 +537,7 @@ def extract(
 
     return results
 
+@logger.catch
 def copy_builds_to_project(build_dir: Path = BUILD_DIR, dest_dir: Path = PROJECT_LIB_DIR):
     build_meta = read_build_meta(build_dir)
     try:
@@ -535,8 +553,7 @@ def copy_builds_to_project(build_dir: Path = BUILD_DIR, dest_dir: Path = PROJECT
             updates_needed[asset_name] = asset_data['build_files'].copy()
             continue
         build_files = asset_data['build_files']
-        normalize_filenames(build_files)
-        build_files = {f.filename: f for f in build_files}
+        build_files = {f.filename.name: f for f in build_files}
         _updates = []
         proj_asset = project_meta[asset_name]
         for data in proj_asset.values():
@@ -547,7 +564,7 @@ def copy_builds_to_project(build_dir: Path = BUILD_DIR, dest_dir: Path = PROJECT
             elif data['tag_name'] != asset_data['tag_name']:
                 needs_update = True
             if needs_update:
-                bf = build_files[data['build_file'].filename]
+                bf = build_files[data['build_file'].filename.name]
                 _updates.append(bf)
         if len(_updates):
             updates_needed[asset_name] = _updates
@@ -560,7 +577,8 @@ def copy_builds_to_project(build_dir: Path = BUILD_DIR, dest_dir: Path = PROJECT
         asset_data = build_meta[asset_name]
         _updates = {}
         symlinks = []
-        for f in build_files:
+        build_files_rel = normalize_filenames_copy(build_files, build_dir)
+        for f, f_rel in zip(build_files, build_files_rel):
             if f.file_type != FileType.lib:
                 continue
             if f.build_type & 'macos':
@@ -580,31 +598,35 @@ def copy_builds_to_project(build_dir: Path = BUILD_DIR, dest_dir: Path = PROJECT
                 dest_fn = f'{dest_fn}{f.filename.suffix}'
             dest_fn = dest_dir / dest_fn
             if f.filename.is_symlink():
-                symlinks.append((f, dest_fn))
+                symlinks.append((f, f_rel, dest_fn))
                 continue
             logger.debug(f'copying {f.filename} to {dest_fn}')
             shutil.copy2(f.filename, dest_fn)
             dest_fn_rel = dest_fn.relative_to(dest_dir)
             _updates[str(dest_fn_rel)] = dict(
                 tag_name=asset_data['tag_name'],
-                build_file=f,
+                build_file=f_rel,
                 proj_file=dest_fn_rel,
             )
 
-        for f, dest_fn in symlinks:
+        for f, f_rel, dest_fn in symlinks:
             sym_fn = f.symlink_target.name
             symlink_target = dest_dir / sym_fn
             symlink_rel = symlink_target.relative_to(dest_dir)
-            logger.debug(f'Symlinking {dest_fn} -> {symlink_target}')
+            logger.debug(f'Symlinking {dest_fn} -> {symlink_target} ({symlink_rel})')
             assert symlink_target.exists()
             if dest_fn.exists():
                 dest_fn.unlink()
             dest_fn.symlink_to(symlink_rel)
-            assert dest_fn.resolve() == symlink_target != dest_fn
+            try:
+                assert dest_fn.resolve() == symlink_target != dest_fn
+            except AssertionError:
+                dest_fn.unlink()
+                raise
             dest_fn_rel = dest_fn.relative_to(dest_dir)
             _updates[str(dest_fn_rel)] = dict(
                 tag_name=asset_data['tag_name'],
-                build_file=f,
+                build_file=f_rel,
                 proj_file=dest_fn_rel,
             )
         _num_updates = len(_updates)

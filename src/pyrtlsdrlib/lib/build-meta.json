@@ -14,7 +14,7 @@
         },
         "filename": {
           "__class__": "pathlib.Path",
-          "value": "build_assets/macos/lib/librtlsdr.0.8git.dylib"
+          "value": "macos/lib/librtlsdr.0.8git.dylib"
         },
         "is_symlink": false,
         "symlink_target": null
@@ -38,12 +38,12 @@
         },
         "filename": {
           "__class__": "pathlib.Path",
-          "value": "build_assets/macos/lib/librtlsdr.0.dylib"
+          "value": "macos/lib/librtlsdr.0.dylib"
         },
         "is_symlink": true,
         "symlink_target": {
           "__class__": "pathlib.Path",
-          "value": "build_assets/macos/lib/librtlsdr.0.8git.dylib"
+          "value": "macos/lib/librtlsdr.0.8git.dylib"
         }
       },
       "proj_file": {
@@ -65,12 +65,12 @@
         },
         "filename": {
           "__class__": "pathlib.Path",
-          "value": "build_assets/macos/lib/librtlsdr.dylib"
+          "value": "macos/lib/librtlsdr.dylib"
         },
         "is_symlink": true,
         "symlink_target": {
           "__class__": "pathlib.Path",
-          "value": "build_assets/macos/lib/librtlsdr.0.8git.dylib"
+          "value": "macos/lib/librtlsdr.0.8git.dylib"
         }
       },
       "proj_file": {
@@ -94,7 +94,7 @@
         },
         "filename": {
           "__class__": "pathlib.Path",
-          "value": "build_assets/windows_w32_static/lib/librtlsdr.dll"
+          "value": "windows_w32_static/lib/librtlsdr.dll"
         },
         "is_symlink": false,
         "symlink_target": null
@@ -120,7 +120,7 @@
         },
         "filename": {
           "__class__": "pathlib.Path",
-          "value": "build_assets/windows_w64_static/lib/librtlsdr.dll"
+          "value": "windows_w64_static/lib/librtlsdr.dll"
         },
         "is_symlink": false,
         "symlink_target": null
@@ -146,7 +146,7 @@
         },
         "filename": {
           "__class__": "pathlib.Path",
-          "value": "build_assets/ubuntu/lib/librtlsdr.so.0.8git"
+          "value": "ubuntu/lib/librtlsdr.so.0.8git"
         },
         "is_symlink": false,
         "symlink_target": null
@@ -170,12 +170,12 @@
         },
         "filename": {
           "__class__": "pathlib.Path",
-          "value": "build_assets/ubuntu/lib/librtlsdr.so"
+          "value": "ubuntu/lib/librtlsdr.so"
         },
         "is_symlink": true,
         "symlink_target": {
           "__class__": "pathlib.Path",
-          "value": "build_assets/ubuntu/lib/librtlsdr.so.0.8git"
+          "value": "ubuntu/lib/librtlsdr.so.0.8git"
         }
       },
       "proj_file": {
@@ -197,12 +197,12 @@
         },
         "filename": {
           "__class__": "pathlib.Path",
-          "value": "build_assets/ubuntu/lib/librtlsdr.so.0"
+          "value": "ubuntu/lib/librtlsdr.so.0"
         },
         "is_symlink": true,
         "symlink_target": {
           "__class__": "pathlib.Path",
-          "value": "build_assets/ubuntu/lib/librtlsdr.so.0.8git"
+          "value": "ubuntu/lib/librtlsdr.so.0.8git"
         }
       },
       "proj_file": {
