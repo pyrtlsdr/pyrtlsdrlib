@@ -5,6 +5,7 @@ import shutil
 import tempfile
 from pathlib import Path
 import dataclasses
+from contextlib import contextmanager
 import functools
 
 try:
@@ -646,20 +647,36 @@ def copy_builds_to_project(build_dir: Path = BUILD_DIR, dest_dir: Path = PROJECT
         logger.info('Project files up to date')
 
 
+
+@contextmanager
+def build_dir_maker(p: Path|None = None, use_tmp: bool = False, cleanup: bool = True):
+    if use_tmp:
+        p = tempfile.mkdtemp()
+    try:
+        yield Path(p)
+    finally:
+        if use_tmp and cleanup:
+            shutil.rmtree(p)
+
+
 @click.command()
 @click.option('--build-dir', type=click.Path(file_okay=False), default=BUILD_DIR)
 @click.option('--project-lib-dir', type=click.Path(file_okay=False), default=PROJECT_LIB_DIR)
 @click.option('--repo-name', default=REPO_NAME)
+@click.option('--use-tmp/--no-use-tmp', default=True)
 @click.option(
     '--build-types',
     type=click.Choice([m.name for m in BuildType.iter_members()] + ['source']),
     multiple=True,
     default=BUILD_DEFAULT.to_str().split('|'),
 )
-def main(build_dir, project_lib_dir, repo_name, build_types):
+def main(build_dir, project_lib_dir, repo_name, use_tmp, build_types):
     build_types = BuildType.from_str('|'.join(build_types))
-    extract(dest_dir=build_dir, repo_name=repo_name, asset_types=build_types)
-    copy_builds_to_project(build_dir=build_dir, dest_dir=project_lib_dir)
+
+    with build_dir_maker(build_dir, use_tmp) as real_build_dir:
+        extract(dest_dir=real_build_dir, repo_name=repo_name, asset_types=build_types)
+        copy_builds_to_project(build_dir=real_build_dir, dest_dir=project_lib_dir)
+
     repo = Repository(repo_name)
     repo.get_license(project_lib_dir)
     if build_types & 'source':
