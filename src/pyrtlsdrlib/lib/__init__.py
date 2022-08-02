@@ -1,0 +1,25 @@
+from importlib.resources import path as resource_path
+
+from pyrtlsdrlib import BuildType
+from pyrtlsdrlib.platform import get_os_type
+from . import custom_build
+
+BUILD_TYPE_LIB_GLOBS = {
+    BuildType.macos: '*.dylib',
+    BuildType.ubuntu: 'librtlsdr.so*',
+    BuildType.windows | BuildType.w32: 'librtlsdr_w32*.dll',
+    BuildType.windows | BuildType.w64: 'librtlsdr_w64*.dll',
+}
+
+def iter_library_files():
+    os_type = get_os_type()
+    lib_glob = BUILD_TYPE_LIB_GLOBS.get(os_type)
+    if lib_glob is not None:
+        with resource_path(custom_build.__name__, '.') as lib_dir:
+            yield from lib_dir.glob(lib_glob)
+        with resource_path(__name__, '.') as lib_dir:
+            yield from lib_dir.glob(lib_glob)
+
+
+def get_library_files():
+    return [p for p in iter_library_files()]
