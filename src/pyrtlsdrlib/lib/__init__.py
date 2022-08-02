@@ -1,3 +1,5 @@
+from ctypes import CDLL
+import traceback
 from importlib.resources import path as resource_path
 
 from pyrtlsdrlib import BuildType
@@ -23,3 +25,14 @@ def iter_library_files():
 
 def get_library_files():
     return [p for p in iter_library_files()]
+
+
+def load_librtlsdr():
+    for lib_file in iter_library_files():
+        try:
+            dll = CDLL(str(lib_file))
+        except Exception as exc:
+            print(f'Could not load {lib_file}. Exception: {exc!r}')
+            dll = None
+        if dll is not None:
+            return dll
