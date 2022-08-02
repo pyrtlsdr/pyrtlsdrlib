@@ -1,5 +1,5 @@
-pyrlsdr-library
-===============
+pyrtlsdrlib
+===========
 
 Experimental project with the goal of providing pre-built binaries of `librtlsdr`_.
 This should allow for installation alongside `pyrtlsdr`_ for Windows and MacOS

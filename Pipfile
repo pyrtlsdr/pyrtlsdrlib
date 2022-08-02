@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pyrlsdrlib = {editable = true, path = "."}
+pyrtlsdrlib = {editable = true, path = "."}
 
 [dev-packages]
 pygithub = "*"
