@@ -14,6 +14,7 @@ from github import Github
 import click
 
 from common import *
+from build_from_source import Builder
 
 
 def normalize_filenames(infiles: tp.Sequence[BuildFile]):
@@ -112,7 +113,7 @@ class Release(ObjBase):
         a = self._assets
         if a is None:
             assets = [Asset(a, parent=self) for a in self.gh_rel.get_assets()]
-            assets.append(SourceAsset(self.gh_rel.zipball_url, parent=self))
+            assets.append(SourceAsset(self.gh_rel.tarball_url, parent=self))
             self.children.extend(assets)
             a = self._assets = {a.name:a for a in assets}
         return a
@@ -194,6 +195,9 @@ class AssetBase(ObjBase):
 
     @property
     def download_filename(self) -> str:
+        return self._get_download_filename()
+
+    def _get_download_filename(self) -> str:
         return self.download_url.split('/')[-1]
 
     def _get_name(self) -> str:
@@ -449,12 +453,17 @@ class SourceAsset(AssetBase):
     def _get_download_url(self) -> str:
         return self.src_url
 
+    def _get_download_filename(self) -> str:
+        return 'source.tar.gz'
+
 @logger.catch
 def extract(
     dest_dir: Path = BUILD_DIR,
     repo_name: str = REPO_NAME,
     asset_types: BuildType = BUILD_DEFAULT,
 ) -> tp.Dict[str, tp.Dict[tp.Any]]:
+
+    asset_types ^= 'source'
 
     repo = Repository(repo_name)
 
@@ -597,7 +606,7 @@ def copy_builds_to_project(build_dir: Path = BUILD_DIR, dest_dir: Path = PROJECT
 @click.option('--repo-name', default=REPO_NAME)
 @click.option(
     '--build-types',
-    type=click.Choice([m.name for m in BuildType.iter_members()]),
+    type=click.Choice([m.name for m in BuildType.iter_members()] + ['source']),
     multiple=True,
     default=BUILD_DEFAULT.to_str().split('|'),
 )
@@ -607,7 +616,15 @@ def main(build_dir, project_lib_dir, repo_name, build_types):
     copy_builds_to_project(build_dir=build_dir, dest_dir=project_lib_dir)
     repo = Repository(repo_name)
     repo.get_license(project_lib_dir)
-
+    if build_types & 'source':
+        release = repo.latest_release
+        src_asset = [a for a in release.assets.values() if a.type & 'source']
+        assert len(src_asset) == 1
+        src_asset = src_asset[0]
+        with Builder(release, src_asset, project_lib_dir) as builder:
+            build_files = builder.build()
+        fn = project_lib_dir / 'cmake-data.json'
+        fn.write_text(jsonfactory.dumps(build_files, indent=2))
 
 if __name__ == '__main__':
     main()
