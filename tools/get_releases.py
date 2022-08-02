@@ -4,8 +4,28 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
+import functools
 
-from loguru import logger
+try:
+    from loguru import logger
+except ImportError:
+    import logging
+    Logger = logging.getLoggerClass()
+    class MyLogger(Logger):
+        def success(self, msg, *args, **kwargs):
+            self.info(msg, *args, **kwargs)
+
+        def catch(self, f):
+            @functools.wraps(f)
+            def inner(*args, **kwargs):
+                return f(*args, **kwargs)
+            return inner
+
+    logging.setLoggerClass(MyLogger)
+    fmt = '[{levelname}] {asctime:s} | {module}:{lineno:03d} | {message}'
+    logging.basicConfig(format=fmt, style='{', datefmt='%H:%M:%S')
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
 
 from pyrtlsdrlib import BuildType, FileType, BuildFile
 import requests
