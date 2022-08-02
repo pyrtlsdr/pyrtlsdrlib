@@ -463,7 +463,8 @@ def extract(
     asset_types: BuildType = BUILD_DEFAULT,
 ) -> tp.Dict[str, tp.Dict[tp.Any]]:
 
-    asset_types ^= 'source'
+    if asset_types & 'source':
+        asset_types ^= 'source'
 
     repo = Repository(repo_name)
 
