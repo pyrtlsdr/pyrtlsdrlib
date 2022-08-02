@@ -662,6 +662,7 @@ def build_dir_maker(p: Path|None = None, use_tmp: bool = False, cleanup: bool = 
 @click.command()
 @click.option('--build-dir', type=click.Path(file_okay=False), default=BUILD_DIR)
 @click.option('--project-lib-dir', type=click.Path(file_okay=False), default=PROJECT_LIB_DIR)
+@click.option('--custom-lib-dir', type=click.Path(file_okay=False), default=CUSTOM_LIB_DIR)
 @click.option('--repo-name', default=REPO_NAME)
 @click.option('--use-tmp/--no-use-tmp', default=True)
 @click.option(
@@ -670,7 +671,7 @@ def build_dir_maker(p: Path|None = None, use_tmp: bool = False, cleanup: bool = 
     multiple=True,
     default=BUILD_DEFAULT.to_str().split('|'),
 )
-def main(build_dir, project_lib_dir, repo_name, use_tmp, build_types):
+def main(build_dir, project_lib_dir, custom_lib_dir, repo_name, use_tmp, build_types):
     build_types = BuildType.from_str('|'.join(build_types))
 
     with build_dir_maker(build_dir, use_tmp) as real_build_dir:
@@ -684,9 +685,9 @@ def main(build_dir, project_lib_dir, repo_name, use_tmp, build_types):
         src_asset = [a for a in release.assets.values() if a.type & 'source']
         assert len(src_asset) == 1
         src_asset = src_asset[0]
-        with Builder(release, src_asset, project_lib_dir) as builder:
+        with Builder(release, src_asset, custom_lib_dir) as builder:
             build_files = builder.build()
-        fn = project_lib_dir / 'cmake-data.json'
+        fn = custom_lib_dir / 'build-meta.json'
         fn.write_text(jsonfactory.dumps(build_files, indent=2))
 
 if __name__ == '__main__':

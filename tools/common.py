@@ -11,14 +11,15 @@ import jsonfactory
 from pyrtlsdrlib import BuildType, FileType, BuildFile
 
 __all__ = (
-    'REPO_NAME', 'ROOT_DIR', 'BUILD_DIR', 'PROJECT_LIB_DIR', 'BUILD_DEFAULT',
-    'DT_FMT', 'get_meta_filename', 'read_build_meta', 'write_build_meta',
+    'REPO_NAME', 'ROOT_DIR', 'BUILD_DIR', 'PROJECT_LIB_DIR', 'CUSTOM_LIB_DIR',
+    'BUILD_DEFAULT', 'DT_FMT', 'get_meta_filename', 'read_build_meta', 'write_build_meta',
 )
 
 REPO_NAME = 'librtlsdr/librtlsdr'
 ROOT_DIR = Path(__file__).resolve().parent.parent
 BUILD_DIR = ROOT_DIR / 'build_assets'
 PROJECT_LIB_DIR = Path(resource_filename('pyrtlsdrlib.lib', ''))
+CUSTOM_LIB_DIR = Path(resource_filename('pyrtlsdrlib.lib.custom_build', ''))
 
 BUILD_DEFAULT = BuildType.from_str('all_os|w32|w64|static')
 
