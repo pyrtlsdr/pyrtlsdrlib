@@ -4,6 +4,7 @@ from pathlib import Path
 import enum
 import datetime
 import dataclasses
+from pkg_resources import resource_filename
 
 import jsonfactory
 
@@ -17,7 +18,7 @@ __all__ = (
 REPO_NAME = 'librtlsdr/librtlsdr'
 ROOT_DIR = Path(__file__).resolve().parent.parent
 BUILD_DIR = ROOT_DIR / 'build_assets'
-PROJECT_LIB_DIR = ROOT_DIR / 'src' / 'pyrtlsdrlib' / 'lib'
+PROJECT_LIB_DIR = Path(resource_filename('pyrtlsdrlib.lib', ''))
 
 BUILD_DEFAULT = BuildType.from_str('all_os|w32|w64|static')
 
