@@ -1,6 +1,7 @@
 from ctypes import CDLL
 import traceback
-from importlib.resources import path as resource_path
+from pkg_resources import resource_filename
+from pathlib import Path
 
 from pyrtlsdrlib import BuildType
 from pyrtlsdrlib.platform import get_os_type
@@ -17,9 +18,8 @@ def iter_library_files():
     os_type = get_os_type()
     lib_glob = BUILD_TYPE_LIB_GLOBS.get(os_type)
     if lib_glob is not None:
-        with resource_path(custom_build.__name__, '.') as lib_dir:
-            yield from lib_dir.glob(lib_glob)
-        with resource_path(__name__, '.') as lib_dir:
+        for lib_pkg in (custom_build.__name__, __name__):
+            lib_dir = Path(resource_filename(lib_pkg, ''))
             yield from lib_dir.glob(lib_glob)
 
 
