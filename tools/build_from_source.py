@@ -76,12 +76,13 @@ class Builder:
         sh(f'cmake -S {self.source_dir} -B {self.cmake_build_dir}')
         logger.debug(f'chdir to {self.cmake_build_dir}')
         os.chdir(self.cmake_build_dir)
-        assert Path.cwd() == self.cmake_build_dir
+        assert Path.cwd().samefile(self.cmake_build_dir)
         sh('make -j 4')
         logger.success('cmake complete')
 
     def copy_builds_to_project(self) -> tp.List[BuildFile]:
         src = self.cmake_build_dir / 'src'
+        src = src.resolve()
         logger.info(f'Copying builds from {src} to {self.lib_dest}')
 
         source_filenames = set(src.glob('librtlsdr*'))
