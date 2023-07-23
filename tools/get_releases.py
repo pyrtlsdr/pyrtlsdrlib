@@ -329,7 +329,7 @@ class AssetBase(ObjBase):
         results = self.build_files = []
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            tmpdir = Path(tmpdir)
+            tmpdir = Path(tmpdir).resolve()
             extract_dir = tmpdir / 'expanded'
             extract_dir.mkdir()
             archive_file = self.download_to(tmpdir)
@@ -599,7 +599,7 @@ def copy_builds_to_project(build_dir: Path = BUILD_DIR, dest_dir: Path = PROJECT
                 dest_fn = '_'.join(dest_fn)
                 dest_fn = f'{dest_fn}{f.filename.suffix}'
             dest_fn = dest_dir / dest_fn
-            if f.filename.is_symlink():
+            if f.is_symlink() or f.filename.is_symlink():
                 symlinks.append((f, f_rel, dest_fn))
                 continue
             logger.debug(f'copying {f.filename} to {dest_fn}')
@@ -654,7 +654,7 @@ def build_dir_maker(p: Path|None = None, use_tmp: bool = False, cleanup: bool = 
     if use_tmp:
         p = tempfile.mkdtemp()
     try:
-        yield Path(p)
+        yield Path(p).resolve()
     finally:
         if use_tmp and cleanup:
             shutil.rmtree(p)
