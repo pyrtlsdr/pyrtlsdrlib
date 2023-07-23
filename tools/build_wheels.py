@@ -7,7 +7,7 @@ import shutil
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 BUILD_DIR = PROJECT_ROOT / 'build'
-PLATFORMS = ['macos', 'win32', 'win64']
+PLATFORMS = ['macos', 'win32', 'win64', 'linux']
 
 def main():
     def build_wheel(os_type):
