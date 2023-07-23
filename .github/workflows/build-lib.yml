@@ -30,11 +30,11 @@ jobs:
           python -m pip install pipenv
           pipenv install --dev
       - name: Build librtlsdr source
-        run: ./tools/get_releases.py --build-types source
+        run: pipenv run ./tools/get_releases.py --build-types source
       - name: Test custom build
-        run: py.test tests/test_custom_build.py
+        run: pipenv run py.test tests/test_custom_build.py
       - name: Build wheel
-        run: python -m build -w
+        run: pipenv run python -m build -w
         env:
           PYRTLSDRLIB_PLATFORM: ${{ matrix.platform-name }}
       - name: Upload artifacts
