@@ -1,7 +1,29 @@
+import sys
 from ctypes import CDLL
 import traceback
-from pkg_resources import resource_filename
 from pathlib import Path
+
+# <rant>
+# Use pkg_resources.resource_filename unless importlib.resources.files is
+# available (added in Python3.9).
+# pkg_resources method has been deprecated, but importlib.resources.files is
+# the first useful method in the stdlib.
+# Welcome to the wonderful world of maintaining libraries and trying to keep
+# up with the new and shiny while still keeping things working so you have
+# fewer GH issues to respond to
+# </rant>
+USE_PKG_RESOURCES = sys.version_info[:2] < (3, 9)
+if USE_PKG_RESOURCES:
+    from pkg_resources import resource_filename as _resource_filename
+else:
+    import importlib.resources
+
+
+def resource_filename(mod_name: str, filename: str) -> Path:
+    if USE_PKG_RESOURCES:
+        return _resource_filename(mod_name, filename)
+    return importlib.resources.files(mod_name) / filename
+
 
 from pyrtlsdrlib import BuildType
 from pyrtlsdrlib.platform import get_os_type
