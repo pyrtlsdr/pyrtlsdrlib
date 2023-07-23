@@ -52,8 +52,14 @@ class Builder:
         self.cmake_build_dir = None
         self._orig_cwd = None
 
-    @logger.catch
     def build(self) -> tp.List[BuildFile]:
+        try:
+            return self._build()
+        except Exception as exc:
+            logger.exception(exc)
+            raise
+
+    def _build(self) -> tp.List[BuildFile]:
         with tempfile.TemporaryDirectory() as tmpdir:
             logger.info(f'Building source asset: {self.asset}')
             tmpdir = self.tmpdir = Path(tmpdir)
