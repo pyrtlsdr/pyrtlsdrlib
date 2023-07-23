@@ -43,6 +43,7 @@ else:
 pkg_data = {
     '*':['LICENSE*', 'README*'],
     'pyrtlsdrlib.lib':['*.json', LIB_GLOB],
+    'pyrtlsdrlib.lib.custom_build':['*.json', LIB_GLOB],
 }
 
 try:
