@@ -82,7 +82,8 @@ class Builder:
         sh(f'cmake -S {self.source_dir} -B {self.cmake_build_dir}')
         logger.debug(f'chdir to {self.cmake_build_dir}')
         os.chdir(self.cmake_build_dir)
-        assert Path.cwd() == self.cmake_build_dir
+        cwd = Path.cwd()
+        assert cwd.resolve() == self.cmake_build_dir.resolve()
         sh('make -j 4')
         logger.success('cmake complete')
 
