@@ -65,7 +65,7 @@ jobs:
         env:
           CIBW_BUILD: ${{ matrix.python-version }}-*
           CIBW_ARCHS: ${{ matrix.arch }}
-          CIBW_TEST_SKIP: '*_arm64 *_universal2:arm64'
+          CIBW_TEST_SKIP: '-*macosx_universal2'
           PYRTLSDRLIB_PLATFORM: ${{ matrix.platform }}
           PYRTLSDRLIB_ARCHITECTURE: ${{ matrix.arch }}
           GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
