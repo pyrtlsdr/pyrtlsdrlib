@@ -22,6 +22,7 @@ before-build = [
 
 [tool.cibuildwheel.linux]
 before-all = "yum install -y libusbx-devel"
+environment-pass = ['PYRTLSDRLIB_PLATFORM', 'PYRTLSDRLIB_ARCHITECTURE']
 
 [tool.cibuildwheel.macos]
 environment = {PYRTLSDRLIB_PLATFORM= "macos", CFLAGS= "-target arm64-apple-macos10.6"}
