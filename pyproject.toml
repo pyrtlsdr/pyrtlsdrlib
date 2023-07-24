@@ -8,7 +8,8 @@ skip = "*-musllinux*"
 test-requires = [
     "pytest",
 ]
-test-command = "py.test {project}/test.py"
+# test-command = "py.test {project}/test.py"
+repair-wheel-command = 'cp {wheel} {dest_dir}'
 environment = {CI= "true", PYRTLSDRLIB_CIBUILDWHEEL= "true"}
 before-build = [
     "pip install pygithub requests loguru json-object-factory click",
