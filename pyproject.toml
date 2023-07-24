@@ -10,19 +10,6 @@ test-requires = [
 ]
 test-command = "py.test {project}/test.py"
 environment = {CI= "true", PYRTLSDRLIB_CIBUILDWHEEL= "true"}
-
-[tool.cibuildwheel.linux]
-before-all = "yum install -y libusbx-devel"
-before-build = [
-    "pip install -e {package}",
-    "python {project}/tools/get_releases.py --build-types source",
-    "pip uninstall -y pyrtlsdrlib"
-]
-
-[tool.cibuildwheel.macos]
-environment = {PYRTLSDRLIB_PLATFORM= "macos", CFLAGS= "-target arm64-apple-macos10.6"}
-repair-wheel-command = ""
-before-all = "brew install libusb"
 before-build = [
     "pip install pygithub requests loguru json-object-factory click",
     "pip install -e {package}",
@@ -32,3 +19,11 @@ before-build = [
     "python setup.py clean",
     "rm -Rf {package}/src/pyrtlsdrlib.egg-info"
 ]
+
+[tool.cibuildwheel.linux]
+before-all = "yum install -y libusbx-devel"
+
+[tool.cibuildwheel.macos]
+environment = {PYRTLSDRLIB_PLATFORM= "macos", CFLAGS= "-target arm64-apple-macos10.6"}
+repair-wheel-command = ""
+before-all = "brew install libusb"
