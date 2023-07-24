@@ -3,6 +3,7 @@ import typing as tp
 import os
 import shutil
 import tempfile
+from contextlib import contextmanager
 from pathlib import Path
 import subprocess
 import shlex
@@ -14,7 +15,7 @@ except ImportError:
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
 
-from pyrtlsdrlib import BuildType, FileType, BuildFile
+from pyrtlsdrlib import BuildType, FileType, BuildFile, get_os_type
 
 from common import *
 
@@ -22,8 +23,18 @@ def sh(cmd_str, check=True, **kwargs):
     logger.debug(f'$ {cmd_str}')
     return subprocess.run(shlex.split(cmd_str), check=check, **kwargs)
 
+@contextmanager
+def build_dir_maker(p: Path|None = None, use_tmp: bool = False, cleanup: bool = True):
+    if use_tmp:
+        p = tempfile.mkdtemp()
+    try:
+        yield Path(p)
+    finally:
+        if use_tmp and cleanup:
+            shutil.rmtree(p)
+
 class Builder:
-    def __init__(self, release, asset, lib_dest: Path):
+    def __init__(self, release: 'github.GitRelease', asset, lib_dest: Path):
         self.release = release
         self.asset = asset
         self.lib_dest = lib_dest
@@ -54,7 +65,8 @@ class Builder:
 
     @logger.catch
     def build(self) -> tp.List[BuildFile]:
-        with tempfile.TemporaryDirectory() as tmpdir:
+        # with tempfile.TemporaryDirectory() as tmpdir:
+        with build_dir_maker(None, use_tmp=True, cleanup=True) as tmpdir:
             logger.info(f'Building source asset: {self.asset}')
             tmpdir = self.tmpdir = Path(tmpdir)
             tar_fn = self.asset.download_to(tmpdir)
@@ -71,6 +83,7 @@ class Builder:
 
     def do_cmake(self):
         logger.info('Running cmake')
+        assert self.source_dir is not None
         self.cmake_build_dir = self.source_dir / 'build'
         self.cmake_build_dir.mkdir()
         sh(f'cmake -S {self.source_dir} -B {self.cmake_build_dir}')
@@ -81,6 +94,7 @@ class Builder:
         logger.success('cmake complete')
 
     def copy_builds_to_project(self) -> tp.List[BuildFile]:
+        assert self.cmake_build_dir is not None
         src = self.cmake_build_dir / 'src'
         src = src.resolve()
         logger.info(f'Copying builds from {src} to {self.lib_dest}')
@@ -88,13 +102,17 @@ class Builder:
         source_filenames = set(src.glob('librtlsdr*'))
         symlinks = []
         build_files = []
+        build_type = get_os_type()
+        assert build_type.filter_archs() == BuildType.arm64
+
         for src_fn in source_filenames.copy():
             if not src_fn.is_symlink():
                 continue
             linked_file = src_fn.resolve().relative_to(src)
+            dest_fn = self.lib_dest / src_fn.name
             bf = BuildFile(
                 file_type=FileType.lib,
-                build_type=BuildType.source,
+                build_type=build_type,
                 filename=self.lib_dest / src_fn.name,
                 is_symlink=True,
                 symlink_target=self.lib_dest / linked_file.name,
@@ -109,7 +127,7 @@ class Builder:
             shutil.copy2(src_fn, dest_fn)
             bf = BuildFile(
                 file_type=FileType.lib,
-                build_type=BuildType.source,
+                build_type=build_type,
                 filename=dest_fn,
             )
             build_files.append(bf)

@@ -1,0 +1,66 @@
+
+name: Build cibuildwheel
+
+on:
+  workflow_dispatch:
+    inputs:
+      os_type:
+        description: "OS"
+        default: "all"
+        type: choice
+        options:
+        - macos-latest
+        - ubuntu-latest
+        - windows-latest
+        - all
+
+jobs:
+  build_wheels:
+    name: Build wheels on ${{ matrix.os }}_${{ matrix.python-version }}-${{ matrix.arch }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - os: macos-latest
+          arch: universal2
+          python-version: "cp3{8,9,10,11}"
+        - os: ubuntu-latest
+          arch: x86_64
+          python-version: "cp3{8,9,10,11}"
+        - os: windows-latest
+          arch: AMD64
+          python-version: "cp3{8,9,10,11}"
+        - os: ubuntu-latest
+          arch: aarch64
+          python-version: "cp38"
+        - os: ubuntu-latest
+          arch: aarch64
+          python-version: "cp39"
+        - os: ubuntu-latest
+          arch: aarch64
+          python-version: "cp310"
+        - os: ubuntu-latest
+          arch: aarch64
+          python-version: "cp311"
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        if: matrix.os == 'ubuntu-latest'
+        uses: docker/setup-qemu-action@v2
+
+      - name: Build wheels
+        id: build_wheel
+        uses: pypa/cibuildwheel@v2.11.2
+        env:
+          CIBW_BUILD: ${{ matrix.python-version }}-*
+          CIBW_ARCHS: ${{ matrix.arch }}
+          GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: ${{ inputs.os_type }} != "" && (${{ inputs.os_type }} == matrix.os || ${{ inputs.os_type }} == "all")
+
+      - uses: actions/upload-artifact@v3
+        if: ${{ steps.build_wheel.outcome }} == "success"
+        with:
+          path: ./wheelhouse/*.whl

@@ -29,9 +29,10 @@ except ImportError:
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
 
-from pyrtlsdrlib import BuildType, FileType, BuildFile
+from pyrtlsdrlib import BuildType, FileType, BuildFile, get_os_type, get_os_arch_dirname
 import requests
 import jsonfactory
+import github
 from github import Github
 import click
 
@@ -150,6 +151,10 @@ class Release(ObjBase):
         self.gh_rel = gh_rel
         self._assets = None
         super().__init__(**kwargs)
+
+    @property
+    def tag_name(self) -> str:
+        return self.gh_rel.tag_name
 
     @property
     def assets(self) -> tp.Dict[str, 'AssetBase']:
@@ -286,18 +291,19 @@ class AssetBase(ObjBase):
         return r
 
     def get_dest_dirname(self) -> str:
-        if self.type & 'ubuntu|macos':
-            return self.type.name
-        elif self.type & 'windows':
-            suffixes = ['w32', 'w64', 'dlldep', 'static', 'udpsrv']
-            dirname = ['windows']
-            for suffix in suffixes:
-                if self.type & suffix:
-                    dirname.append(suffix)
-            return '_'.join(dirname)
-        elif self.type & 'source':
-            return 'source'
-        raise ValueError('Could not determine dest_dirname')
+        return get_os_arch_dirname(self.type)
+        # if self.type & 'ubuntu|macos':
+        #     return self.type.name
+        # elif self.type & 'windows':
+        #     suffixes = ['w32', 'w64', 'dlldep', 'static', 'udpsrv']
+        #     dirname = ['windows']
+        #     for suffix in suffixes:
+        #         if self.type & suffix:
+        #             dirname.append(suffix)
+        #     return '_'.join(dirname)
+        # elif self.type & 'source':
+        #     return 'source'
+        # raise ValueError('Could not determine dest_dirname')
 
     def download_to(self, dest_dir: Path) -> Path:
         dest_filename = dest_dir / self.download_filename
@@ -328,7 +334,7 @@ class AssetBase(ObjBase):
         results = self.build_files = []
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            tmpdir = Path(tmpdir)
+            tmpdir = Path(tmpdir).resolve()
             extract_dir = tmpdir / 'expanded'
             extract_dir.mkdir()
             archive_file = self.download_to(tmpdir)
@@ -386,7 +392,7 @@ class AssetBase(ObjBase):
             for build_file in symlinks:
                 fn = build_file.filename.name
                 sym_fn = build_file.symlink_target.name
-                fdest_dir = build_file.filename.parent
+                fdest_dir = dest_map.get(self._get_filetype(build_file.filename))
 
                 symlink_target = fdest_dir / sym_fn
                 symlink_rel = symlink_target.relative_to(fdest_dir)
@@ -466,7 +472,9 @@ class Asset(AssetBase):
 
         for os_name in os_names:
             if os_name in name:
-                return BuildType.from_str(os_name)
+                bt = BuildType.from_str(os_name)
+                bt |= BuildType.x86_x64
+                return bt
         tp_val = BuildType.unknown
         suffixes = ['w32', 'w64', 'dlldep', 'static', 'udpsrv']
         for suffix in suffixes:
@@ -497,6 +505,9 @@ class SourceAsset(AssetBase):
     def _get_download_filename(self) -> str:
         return 'source.tar.gz'
 
+    def __str__(self):
+        return f'{self.name}: {self.src_url}'
+
 @logger.catch
 def extract(
     dest_dir: Path = BUILD_DIR,
@@ -518,24 +529,31 @@ def extract(
         if not asset_types.contains(asset.type):
             logger.info(f'Skipping asset: {asset}')
             continue
-        if not asset.needs_update(dest_dir):
+        logger.debug(f'{asset.type=}')
+        _dest_dir = get_os_arch_dirname(asset.type)
+        _dest_dir = dest_dir / _dest_dir
+        _dest_dir.mkdir()
+        logger.info(f'{_dest_dir=}')
+        if not asset.needs_update(_dest_dir):
             logger.info(f'No update needed for "{asset!r}"')
             assert asset.metadata_matches
-            meta = asset.update_metadata(dest_dir)
+            meta = asset.update_metadata(_dest_dir)
             results[asset.name] = meta
             continue
-        files = asset.extract_to(dest_dir)
+        files = asset.extract_to(_dest_dir)
         if len(files):
             changed = True
             files_changed.extend(files)
             meta = asset.get_build_meta()
         else:
             assert asset.metadata_matches
-            meta = asset.update_metadata(dest_dir)
+            meta = asset.update_metadata(_dest_dir)
+        meta['dest_dir'] = _dest_dir
         results[asset.name] = meta
 
-    write_build_meta(dest_dir, results)
+        write_build_meta(_dest_dir, results[asset.name])
 
+    write_build_meta(dest_dir, results)
     return results
 
 @logger.catch
@@ -576,6 +594,10 @@ def copy_builds_to_project(build_dir: Path = BUILD_DIR, dest_dir: Path = PROJECT
     for asset_name, build_files in updates_needed.items():
         logger.info(f'Updating files for "{asset_name}"')
         asset_data = build_meta[asset_name]
+        dirname = asset_data['dest_dir'].name
+        _dest_dir = dest_dir / dirname
+        if not _dest_dir.exists():
+            ensure_package_dir(_dest_dir)
         _updates = {}
         symlinks = []
         build_files_rel = normalize_filenames_copy(build_files, build_dir)
@@ -597,13 +619,13 @@ def copy_builds_to_project(build_dir: Path = BUILD_DIR, dest_dir: Path = PROJECT
                         dest_fn.append(suffix)
                 dest_fn = '_'.join(dest_fn)
                 dest_fn = f'{dest_fn}{f.filename.suffix}'
-            dest_fn = dest_dir / dest_fn
-            if f.filename.is_symlink():
+            dest_fn = _dest_dir / dest_fn
+            if f.is_symlink or f.filename.is_symlink():
                 symlinks.append((f, f_rel, dest_fn))
                 continue
             logger.debug(f'copying {f.filename} to {dest_fn}')
             shutil.copy2(f.filename, dest_fn)
-            dest_fn_rel = dest_fn.relative_to(dest_dir)
+            dest_fn_rel = dest_fn.relative_to(_dest_dir)
             _updates[str(dest_fn_rel)] = dict(
                 tag_name=asset_data['tag_name'],
                 build_file=f_rel,
@@ -612,8 +634,8 @@ def copy_builds_to_project(build_dir: Path = BUILD_DIR, dest_dir: Path = PROJECT
 
         for f, f_rel, dest_fn in symlinks:
             sym_fn = f.symlink_target.name
-            symlink_target = dest_dir / sym_fn
-            symlink_rel = symlink_target.relative_to(dest_dir)
+            symlink_target = _dest_dir / sym_fn
+            symlink_rel = symlink_target.relative_to(_dest_dir)
             logger.debug(f'Symlinking {dest_fn} -> {symlink_target} ({symlink_rel})')
             assert symlink_target.exists()
             if dest_fn.exists():
@@ -624,7 +646,7 @@ def copy_builds_to_project(build_dir: Path = BUILD_DIR, dest_dir: Path = PROJECT
             except AssertionError:
                 dest_fn.unlink()
                 raise
-            dest_fn_rel = dest_fn.relative_to(dest_dir)
+            dest_fn_rel = dest_fn.relative_to(_dest_dir)
             _updates[str(dest_fn_rel)] = dict(
                 tag_name=asset_data['tag_name'],
                 build_file=f_rel,
@@ -641,11 +663,35 @@ def copy_builds_to_project(build_dir: Path = BUILD_DIR, dest_dir: Path = PROJECT
         for asset_name, updates in meta_updates.items():
             existing = project_meta.setdefault(asset_name, {})
             existing.update(updates)
+            dirname = asset_data['dest_dir'].name
+            _dest_dir = dest_dir / dirname
+            write_build_meta(_dest_dir, existing)
         write_build_meta(dest_dir, project_meta)
         logger.success(f'Updated {num_updates} total project files')
     else:
         logger.info('Project files up to date')
 
+def ensure_package_dir(pkg_dir: Path):
+    pkg_dir.mkdir(exist_ok=True)
+    init_py = pkg_dir / '__init__.py'
+    if not init_py.exists():
+        init_py.touch()
+
+def setup_source_build_dir(project_lib_dir: Path, build_types: BuildType|None = None) -> Path:
+    dirname = get_os_arch_dirname(build_types)
+    build_dir = project_lib_dir / dirname
+    ensure_package_dir(build_dir)
+    patterns = ['librtlsdr*', '*.dll', '*.so', '*.dylib', 'build-meta.json']
+    to_remove = set()
+    for pattern in patterns:
+        to_remove |= set(build_dir.glob(pattern))
+    lines = ['Removing build files:']
+    lines.extend([str(fn) for fn in to_remove])
+    lines.append('')
+    click.echo('\n'.join(lines))
+    for fn in to_remove:
+        fn.unlink()
+    return build_dir
 
 
 @contextmanager
@@ -653,25 +699,31 @@ def build_dir_maker(p: Path|None = None, use_tmp: bool = False, cleanup: bool = 
     if use_tmp:
         p = tempfile.mkdtemp()
     try:
-        yield Path(p)
+        yield Path(p).resolve()
+    except:
+        raise
     finally:
         if use_tmp and cleanup:
             shutil.rmtree(p)
 
-
-@click.command()
+@click.group()
+def cli():
+    pass
+@cli.command()
 @click.option('--build-dir', type=click.Path(file_okay=False), default=BUILD_DIR)
 @click.option('--project-lib-dir', type=click.Path(file_okay=False), default=PROJECT_LIB_DIR)
-@click.option('--custom-lib-dir', type=click.Path(file_okay=False), default=CUSTOM_LIB_DIR)
+# @click.option('--custom-lib-dir', type=click.Path(file_okay=False), default=CUSTOM_LIB_DIR)
 @click.option('--repo-name', default=REPO_NAME)
 @click.option('--use-tmp/--no-use-tmp', default=True)
 @click.option(
     '--build-types',
     type=click.Choice([m.name for m in BuildType.iter_members()] + ['source']),
     multiple=True,
-    default=BUILD_DEFAULT.to_str().split('|'),
+    default=
+    BUILD_DEFAULT.to_str().split('|'),
 )
-def main(build_dir, project_lib_dir, custom_lib_dir, repo_name, use_tmp, build_types):
+@click.option('--build-source/--no-build-source', default=False)
+def build(build_dir, project_lib_dir, repo_name, use_tmp, build_types, build_source):
     build_types = BuildType.from_str('|'.join(build_types))
 
     with build_dir_maker(build_dir, use_tmp) as real_build_dir:
@@ -680,15 +732,48 @@ def main(build_dir, project_lib_dir, custom_lib_dir, repo_name, use_tmp, build_t
 
     repo = Repository(repo_name)
     repo.get_license(project_lib_dir)
-    if build_types & 'source':
+    if build_source:
+        custom_lib_dir = setup_source_build_dir(project_lib_dir)
+        logger.info(f'{custom_lib_dir=}')
         release = repo.latest_release
         src_asset = [a for a in release.assets.values() if a.type & 'source']
         assert len(src_asset) == 1
         src_asset = src_asset[0]
         with Builder(release, src_asset, custom_lib_dir) as builder:
             build_files = builder.build()
+        build_files_rel = normalize_filenames_copy(build_files, custom_lib_dir)
+        build_meta = {}
+        for bf in build_files_rel:
+            build_meta[str(bf.filename)] = dict(
+                tag_name=release.tag_name,
+                build_file=bf,
+                proj_file=bf.filename,
+            )
+
         fn = custom_lib_dir / 'build-meta.json'
-        fn.write_text(jsonfactory.dumps(build_files, indent=2))
+        fn.write_text(jsonfactory.dumps(build_meta, indent=2))
+
+@cli.command()
+@click.option('--project-root-dir', type=click.Path(file_okay=False), default=ROOT_DIR)
+@click.option('-y', '--yes', is_flag=True)
+def clean(project_root_dir, yes):
+    lib_dir = project_root_dir / 'src' / 'pyrtlsdrlib' / 'lib'
+    custom_lib_dir = lib_dir / 'custom_build'
+    to_remove = set()
+    patterns = ['librtlsdr*', '*.dll', '*.so', '*.dylib', 'build-meta.json']
+    for pattern in patterns:
+        to_remove |= set(custom_lib_dir.glob(pattern))
+    if not len(to_remove):
+        click.echo('Nothing to remove')
+        return
+    lines = ['Removing build files:']
+    lines.extend([str(fn) for fn in to_remove])
+    click.echo('\n'.join(lines))
+    if not yes:
+        if not click.confirm('Continue?'):
+            return
+    for fn in to_remove:
+        fn.unlink()
 
 if __name__ == '__main__':
-    main()
+    cli()

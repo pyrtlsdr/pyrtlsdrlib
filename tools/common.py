@@ -13,6 +13,7 @@ from pyrtlsdrlib import BuildType, FileType, BuildFile
 __all__ = (
     'REPO_NAME', 'ROOT_DIR', 'BUILD_DIR', 'PROJECT_LIB_DIR', 'CUSTOM_LIB_DIR',
     'BUILD_DEFAULT', 'DT_FMT', 'get_meta_filename', 'read_build_meta', 'write_build_meta',
+    'update_build_meta',
 )
 
 REPO_NAME = 'librtlsdr/librtlsdr'
@@ -21,7 +22,7 @@ BUILD_DIR = ROOT_DIR / 'build_assets'
 PROJECT_LIB_DIR = Path(resource_filename('pyrtlsdrlib.lib', ''))
 CUSTOM_LIB_DIR = Path(resource_filename('pyrtlsdrlib.lib.custom_build', ''))
 
-BUILD_DEFAULT = BuildType.from_str('all_os|w32|w64|static')
+BUILD_DEFAULT = BuildType.from_str('all_os|w32|w64|x86_x64|static')
 
 DT_FMT = '%Y-%m-%dT%H:%M:%SZ'
 
@@ -37,10 +38,21 @@ def read_build_meta(dir_or_filename: Path):
     fn = get_meta_filename(dir_or_filename)
     return jsonfactory.loads(fn.read_text())
 
-def write_build_meta(dir_or_filename: Path, data):
+def write_build_meta(dir_or_filename: Path, data: dict, overwrite: bool = True):
+    if not overwrite:
+        update_build_meta(dir_or_filename, data)
+        return
     fn = get_meta_filename(dir_or_filename)
     fn.write_text(jsonfactory.dumps(data, indent=2))
 
+def update_build_meta(dir_or_filename: Path, data):
+    fn = get_meta_filename(dir_or_filename)
+    if fn.exists():
+        existing_data = jsonfactory.loads(fn.read_text())
+    else:
+        existing_data = {}
+    existing_data.update(data)
+    fn.write_text(jsonfactory.dumps(existing_data, indent=2))
 
 @jsonfactory.register
 class JSONEncoder:
