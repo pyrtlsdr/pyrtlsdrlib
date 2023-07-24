@@ -474,7 +474,7 @@ class Asset(AssetBase):
         for os_name in os_names:
             if os_name in name:
                 bt = BuildType.from_str(os_name)
-                bt |= BuildType.x86_x64
+                bt |= BuildType.x86_64
                 return bt
         tp_val = BuildType.unknown
         suffixes = ['w32', 'w64', 'dlldep', 'static', 'udpsrv']

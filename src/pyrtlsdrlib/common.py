@@ -81,14 +81,14 @@ class BuildType(enum.Flag):
     static = enum.auto()
     udpsrv = enum.auto()
 
-    x86_x64 = enum.auto()
+    x86_64 = enum.auto()
     i686 = enum.auto()
     aarch64 = enum.auto()
     arm64 = enum.auto()
     universal2 = enum.auto()
 
     all_os = macos | windows | ubuntu
-    all_archs = w32 | w64 | x86_x64 | i686 | aarch64 | arm64 | universal2
+    all_archs = w32 | w64 | x86_64 | i686 | aarch64 | arm64 | universal2
 
     @classmethod
     def iter_members(cls) -> tp.Iterable[BuildType]:

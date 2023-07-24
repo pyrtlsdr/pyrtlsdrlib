@@ -22,7 +22,7 @@ BUILD_DIR = ROOT_DIR / 'build_assets'
 PROJECT_LIB_DIR = Path(resource_filename('pyrtlsdrlib.lib', ''))
 CUSTOM_LIB_DIR = Path(resource_filename('pyrtlsdrlib.lib.custom_build', ''))
 
-BUILD_DEFAULT = BuildType.from_str('all_os|w32|w64|x86_x64|static')
+BUILD_DEFAULT = BuildType.from_str('all_os|w32|w64|x86_64|static')
 
 DT_FMT = '%Y-%m-%dT%H:%M:%SZ'
 
