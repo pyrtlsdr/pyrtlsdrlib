@@ -81,6 +81,8 @@ else:
                 oses = 'win32'
             elif OS_TYPE == 'win64':
                 oses = 'win_amd64'
+            elif OS_TYPE == 'linux':
+                oses = 'linux_x86_64'
             else:
                 oses = 'any'
             return 'py3', 'none', oses

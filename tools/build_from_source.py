@@ -19,6 +19,8 @@ from pyrtlsdrlib import BuildType, FileType, BuildFile, get_os_type
 
 from common import *
 
+OS_TYPE = get_os_type()
+
 def sh(cmd_str, check=True, **kwargs):
     logger.debug(f'$ {cmd_str}')
     return subprocess.run(shlex.split(cmd_str), check=check, **kwargs)
@@ -63,8 +65,14 @@ class Builder:
         self.cmake_build_dir = None
         self._orig_cwd = None
 
-    @logger.catch
     def build(self) -> tp.List[BuildFile]:
+        try:
+            return self._build()
+        except Exception as exc:
+            logger.exception(exc)
+            raise
+
+    def _build(self) -> tp.List[BuildFile]:
         # with tempfile.TemporaryDirectory() as tmpdir:
         with build_dir_maker(None, use_tmp=True, cleanup=True) as tmpdir:
             logger.info(f'Building source asset: {self.asset}')
@@ -86,7 +94,10 @@ class Builder:
         assert self.source_dir is not None
         self.cmake_build_dir = self.source_dir / 'build'
         self.cmake_build_dir.mkdir()
-        sh(f'cmake -S {self.source_dir} -B {self.cmake_build_dir}')
+        cmake_args = ''
+        if OS_TYPE == BuildType.macos:
+            cmake_args = f'{cmake_args} -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"'
+        sh(f'cmake {cmake_args} -S {self.source_dir} -B {self.cmake_build_dir}')
         logger.debug(f'chdir to {self.cmake_build_dir}')
         os.chdir(self.cmake_build_dir)
         assert Path.cwd().samefile(self.cmake_build_dir)

@@ -4,11 +4,11 @@ from pathlib import Path
 import enum
 import datetime
 import dataclasses
-from pkg_resources import resource_filename
 
 import jsonfactory
 
 from pyrtlsdrlib import BuildType, FileType, BuildFile
+from pyrtlsdrlib.lib import resource_filename
 
 __all__ = (
     'REPO_NAME', 'ROOT_DIR', 'BUILD_DIR', 'PROJECT_LIB_DIR', 'CUSTOM_LIB_DIR',
