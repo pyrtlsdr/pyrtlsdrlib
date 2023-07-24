@@ -31,6 +31,8 @@ jobs:
           pipenv install --dev
       - name: Build librtlsdr source
         run: pipenv run ./tools/get_releases.py --build-types source
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Test custom build
         run: pipenv run py.test tests/test_custom_build.py
       - name: Build wheel
