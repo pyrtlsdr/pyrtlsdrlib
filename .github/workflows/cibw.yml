@@ -2,6 +2,8 @@
 name: Build cibuildwheel
 
 on:
+  push:
+    branches: [main, cibw-temp]
   workflow_dispatch:
     inputs:
       os_type:
