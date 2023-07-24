@@ -116,7 +116,7 @@ class Repository(ObjBase):
     def gh(self) -> Github:
         g = self._gh
         if g is None:
-            token = os.environ.get('GITHUB_API_TOKEN')
+            token = os.environ.get('GITHUB_TOKEN')
             g = self._gh = Github(token)
             del token
         return g
