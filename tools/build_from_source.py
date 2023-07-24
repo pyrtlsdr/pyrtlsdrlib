@@ -15,8 +15,11 @@ except ImportError:
     logger.setLevel(logging.DEBUG)
 
 from pyrtlsdrlib import BuildType, FileType, BuildFile
+from pyrtlsdrlib.platform import get_os_type
 
 from common import *
+
+OS_TYPE = get_os_type()
 
 def sh(cmd_str, check=True, **kwargs):
     logger.debug(f'$ {cmd_str}')
@@ -79,7 +82,10 @@ class Builder:
         logger.info('Running cmake')
         self.cmake_build_dir = self.source_dir / 'build'
         self.cmake_build_dir.mkdir()
-        sh(f'cmake -S {self.source_dir} -B {self.cmake_build_dir}')
+        cmake_args = ''
+        if OS_TYPE == BuildType.macos:
+            cmake_args = f'{cmake_args} -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"'
+        sh(f'cmake {cmake_args} -S {self.source_dir} -B {self.cmake_build_dir}')
         logger.debug(f'chdir to {self.cmake_build_dir}')
         os.chdir(self.cmake_build_dir)
         assert Path.cwd().samefile(self.cmake_build_dir)
