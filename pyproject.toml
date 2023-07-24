@@ -12,7 +12,7 @@ test-command = "py.test {project}/test.py"
 environment = {CI= "true", PYRTLSDRLIB_CIBUILDWHEEL= "true"}
 
 [tool.cibuildwheel.linux]
-before-all = "yum install -y libusb-1.0-0-dev"
+before-all = "yum install -y libusbx-devel"
 before-build = [
     "pip install -e {package}",
     "python {project}/tools/get_releases.py --build-types source",
