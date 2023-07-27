@@ -20,6 +20,9 @@ jobs:
             platform-name: 'macos'
             arch: 'arm64'
             bottle-tag: 'arm64_monterey'
+          - os: windows-latest
+            platform: win64
+            arch: AMD64
     runs-on:
       ${{ matrix.os }}
     steps:
