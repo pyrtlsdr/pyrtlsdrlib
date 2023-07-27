@@ -49,8 +49,7 @@ jobs:
           python -m pip install pipenv
           pipenv install --dev
       - name: Build librtlsdr source
-        shell: bash
-        run: pipenv run ./tools/get_releases.py --build-types source --macos-arch=$MACOS_ARCH
+        run: pipenv run python tools/get_releases.py --build-types source --macos-arch=$MACOS_ARCH
         env:
           MACOS_ARCH: ${{ matrix.arch }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
