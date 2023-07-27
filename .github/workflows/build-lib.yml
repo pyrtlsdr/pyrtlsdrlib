@@ -34,7 +34,7 @@ jobs:
         if: ${{ matrix.platform-name == 'linux' }}
       - name: Install libusb
         run: |
-          brew uninstall libusb
+          brew uninstall --ignore-dependencies libusb
           brew fetch --force --bottle-tag $BOTTLE_TAG libusb
           export BOTTLE_PATH=$(brew --cache --bottle-tag=$BOTTLE_TAG libusb)
           brew install $BOTTLE_PATH
