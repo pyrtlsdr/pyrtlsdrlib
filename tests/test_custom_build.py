@@ -15,7 +15,7 @@ def test_custom_build_exists(custom_lib_root):
         lib_files.append(p)
     assert len(lib_files) > 0
 
-@pytest.mark.skipif(IS_CI and MACOS_ARCH=='arm64')
+@pytest.mark.skipif(IS_CI and MACOS_ARCH=='arm64', reason="arm64 lib won't load on x86_64 runner")
 def test_custom_build_loads(custom_lib_root):
     dll = load_librtlsdr()
     assert dll is not None
