@@ -24,14 +24,14 @@ class BuildType(enum.Flag):
     all_os = macos | windows | ubuntu
 
     @classmethod
-    def iter_members(cls) -> tp.Iterable['BuildType']:
+    def iter_members(cls) -> tp.Iterator[BuildType]:
         for atype in cls:
             if atype == cls.all_os or atype == cls.unknown:
                 continue
             yield atype
 
     @staticmethod
-    def from_str(s: str) -> 'BuildType':
+    def from_str(s: str) -> BuildType:
         if '|' in s:
             result = BuildType.unknown
             for name in s.split('|'):
@@ -41,11 +41,11 @@ class BuildType(enum.Flag):
             return result
         return getattr(BuildType, s.lower())
 
-    def filter_options(self) -> 'BuildType':
+    def filter_options(self) -> BuildType:
         to_exclude = self.from_str('all_os|source')
         return self ^ to_exclude
 
-    def contains(self, other: 'BuildType'|str) -> bool:
+    def contains(self, other: BuildType|str) -> bool:
         if isinstance(other, str):
             other = BuildType.from_str(other)
         if self & 'windows' and other & 'windows':
@@ -65,22 +65,22 @@ class BuildType(enum.Flag):
             return '|'.join((obj.name for obj in self))
         return self.name
 
-    def __iter__(self) -> tp.Iterable['BuildType']:
+    def __iter__(self) -> tp.Iterator[BuildType]:
         for atype in self.iter_members():
             if atype & self:
                 yield atype
 
-    def __or__(self, other: 'BuildType'|str):
+    def __or__(self, other: BuildType|str):
         if isinstance(other, str):
             other = self.from_str(other)
         return super().__or__(other)
 
-    def __and__(self, other: 'BuildType'|str):
+    def __and__(self, other: BuildType|str):
         if isinstance(other, str):
             other = self.from_str(other)
         return super().__and__(other)
 
-    def __xor__(self, other: 'BuildType'|str):
+    def __xor__(self, other: BuildType|str):
         if isinstance(other, str):
             other = self.from_str(other)
         return super().__xor__(other)
@@ -92,7 +92,7 @@ class FileType(enum.Enum):
     other = enum.auto()
 
     @staticmethod
-    def from_str(s: str) -> 'FileType':
+    def from_str(s: str) -> FileType:
         return getattr(FileType, s.lower())
 
     def to_str(self) -> str:
@@ -141,7 +141,7 @@ class BuildFile:
         return fields
 
     @classmethod
-    def _deserialize(cls, data: tp.Dict[str, tp.Any]) -> 'BuildFile':
+    def _deserialize(cls, data: tp.Dict[str, tp.Any]) -> BuildFile:
         kw = {}
         for fname, ftype in cls._get_field_map().items():
             val = data.get(fname)
@@ -150,6 +150,7 @@ class BuildFile:
             if isinstance(ftype, enum.EnumMeta) and not isinstance(val, enum.Enum):
                 val = ftype.from_str(val)
             elif ftype is Path and not isinstance(val, Path):
+                assert isinstance(val, str)
                 val = Path(val)
             kw[fname] = val
 
@@ -164,7 +165,7 @@ class BuildFile:
         d = dataclasses.asdict(self)
         for key in d:
             val = d[key]
-            if isinstance(val, enum.Enum):
+            if isinstance(val, (BuildType, FileType)):
                 val = val.to_str()
             elif isinstance(val, Path):
                 val = str(val)

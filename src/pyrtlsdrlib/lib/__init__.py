@@ -1,3 +1,4 @@
+from typing import cast
 import sys
 from ctypes import CDLL
 import traceback
@@ -21,8 +22,8 @@ else:
 
 def resource_filename(mod_name: str, filename: str) -> Path:
     if USE_PKG_RESOURCES:
-        return _resource_filename(mod_name, filename)
-    return importlib.resources.files(mod_name) / filename
+        return Path(_resource_filename(mod_name, filename))
+    return cast(Path, importlib.resources.files(mod_name) / filename)
 
 
 from pyrtlsdrlib import BuildType

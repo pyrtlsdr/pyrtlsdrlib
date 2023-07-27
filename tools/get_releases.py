@@ -9,30 +9,16 @@ import dataclasses
 from contextlib import contextmanager
 import functools
 
-try:
-    from loguru import logger
-except ImportError:
-    import logging
-    Logger = logging.getLoggerClass()
-    class MyLogger(Logger):
-        def success(self, msg, *args, **kwargs):
-            self.info(msg, *args, **kwargs)
+from loguru import logger
 
-        def catch(self, f):
-            @functools.wraps(f)
-            def inner(*args, **kwargs):
-                return f(*args, **kwargs)
-            return inner
-
-    logging.setLoggerClass(MyLogger)
-    fmt = '[{levelname}] {asctime:s} | {module}:{lineno:03d} | {message}'
-    logging.basicConfig(format=fmt, style='{', datefmt='%H:%M:%S')
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
 
 from pyrtlsdrlib import BuildType, FileType, BuildFile
 import requests
 import jsonfactory
+if tp.TYPE_CHECKING:
+    from github.Repository import Repository as GitRepository
+    from github.GitRelease import GitRelease
+    from github.GitReleaseAsset import GitReleaseAsset
 from github import Github
 import click
 
@@ -52,7 +38,7 @@ def normalize_filenames_inplace(
         if f.filename.is_absolute():
             fn = f.filename.relative_to(rel_dir)
             f.filename = fn
-        if f.is_symlink and f.symlink_target.is_absolute():
+        if f.is_symlink and f.symlink_target is not None and f.symlink_target.is_absolute():
             fn = f.symlink_target.relative_to(rel_dir)
             f.symlink_target = fn
 
@@ -122,14 +108,14 @@ class Repository(ObjBase):
         return g
 
     @property
-    def repo(self) -> 'github.Repository':
+    def repo(self) -> GitRepository:
         r = self._repo
         if r is None:
             r = self._repo = self.gh.get_repo(self.repo_name)
         return r
 
     @property
-    def latest_release(self) -> 'Release':
+    def latest_release(self) -> Release:
         r = self._latest_release
         if r is None:
             gh_rel = self.repo.get_latest_release()
@@ -147,7 +133,7 @@ class Repository(ObjBase):
         return self.repo_name
 
 class Release(ObjBase):
-    def __init__(self, gh_rel: 'github.GitRelease', **kwargs):
+    def __init__(self, gh_rel: GitRelease, **kwargs):
         self.gh_rel = gh_rel
         self._assets = None
         super().__init__(**kwargs)
@@ -156,7 +142,7 @@ class Release(ObjBase):
     def assets(self) -> tp.Dict[str, 'AssetBase']:
         a = self._assets
         if a is None:
-            assets = [Asset(a, parent=self) for a in self.gh_rel.get_assets()]
+            assets: list[AssetBase] = [Asset(a, parent=self) for a in self.gh_rel.get_assets()]
             assets.append(SourceAsset(self.gh_rel.tarball_url, parent=self))
             self.children.extend(assets)
             a = self._assets = {a.name:a for a in assets}
@@ -425,6 +411,7 @@ class AssetBase(ObjBase):
         if dest_dir.name != self.get_dest_dirname():
             dest_dir = dest_dir / self.get_dest_dirname()
         data = self.read_metadata(dest_dir, deserialize=False)
+        assert data is not None
         data.update(dict(
             files_updated=self.files_updated,
             metadata_matches=self.metadata_matches,
@@ -454,7 +441,7 @@ class AssetBase(ObjBase):
 
 
 class Asset(AssetBase):
-    def __init__(self, gh_asset: 'github.GitReleaseAsset', **kwargs):
+    def __init__(self, gh_asset: GitReleaseAsset, **kwargs):
         self.gh_asset = gh_asset
         super().__init__(**kwargs)
 
@@ -503,7 +490,7 @@ def extract(
     dest_dir: Path = BUILD_DIR,
     repo_name: str = REPO_NAME,
     asset_types: BuildType = BUILD_DEFAULT,
-) -> tp.Dict[str, tp.Dict[tp.Any]]:
+) -> tp.Dict[str, tp.Any]:
 
     if asset_types & 'source':
         asset_types ^= 'source'
@@ -598,6 +585,8 @@ def copy_builds_to_project(build_dir: Path = BUILD_DIR, dest_dir: Path = PROJECT
                         dest_fn.append(suffix)
                 dest_fn = '_'.join(dest_fn)
                 dest_fn = f'{dest_fn}{f.filename.suffix}'
+            else:
+                raise RuntimeError(f'Unknown build type: {f.built_type}')
             dest_fn = dest_dir / dest_fn
             if f.is_symlink() or f.filename.is_symlink():
                 symlinks.append((f, f_rel, dest_fn))
@@ -652,9 +641,10 @@ def copy_builds_to_project(build_dir: Path = BUILD_DIR, dest_dir: Path = PROJECT
 @contextmanager
 def build_dir_maker(p: Path|None = None, use_tmp: bool = False, cleanup: bool = True):
     if use_tmp:
-        p = tempfile.mkdtemp()
+        p = Path(tempfile.mkdtemp())
+    assert p is not None
     try:
-        yield Path(p).resolve()
+        yield p.resolve()
     finally:
         if use_tmp and cleanup:
             shutil.rmtree(p)

@@ -6,13 +6,7 @@ import tempfile
 from pathlib import Path
 import subprocess
 import shlex
-
-try:
-    from loguru import logger
-except ImportError:
-    import logging
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
+from loguru import logger
 
 from pyrtlsdrlib import BuildType, FileType, BuildFile
 from pyrtlsdrlib.platform import get_os_type
@@ -80,6 +74,7 @@ class Builder:
 
     def do_cmake(self):
         logger.info('Running cmake')
+        assert self.source_dir is not None
         self.cmake_build_dir = self.source_dir / 'build'
         self.cmake_build_dir.mkdir()
         cmake_args = ''
@@ -93,6 +88,7 @@ class Builder:
         logger.success('cmake complete')
 
     def copy_builds_to_project(self) -> tp.List[BuildFile]:
+        assert self.cmake_build_dir is not None
         src = self.cmake_build_dir / 'src'
         src = src.resolve()
         logger.info(f'Copying builds from {src} to {self.lib_dest}')

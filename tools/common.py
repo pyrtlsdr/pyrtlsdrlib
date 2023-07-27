@@ -44,7 +44,7 @@ def write_build_meta(dir_or_filename: Path, data):
 
 @jsonfactory.register
 class JSONEncoder:
-    classes: tp.Tuple[type] = (datetime.datetime, Path, BuildType, FileType, BuildFile)
+    classes = (datetime.datetime, Path, BuildType, FileType, BuildFile)
     @classmethod
     def cls_to_str(cls, obj):
         is_enum_cls = isinstance(obj, enum.EnumMeta)
@@ -66,7 +66,7 @@ class JSONEncoder:
             if cls.cls_to_str(the_class) == s:
                 return the_class
     def encode(self, o):
-        if isinstance(o, enum.Enum):
+        if isinstance(o, (BuildType, FileType)):
             d = {'__class__':self.cls_to_str(o)}
             d['value'] = o.to_str()
         elif isinstance(o, BuildFile):
@@ -87,7 +87,7 @@ class JSONEncoder:
         cls = self.str_to_cls(d['__class__'])
         if cls is None:
             raise Exception(str(d))
-        if isinstance(cls, enum.EnumMeta):
+        if isinstance(cls, (BuildType, FileType)):
             return cls.from_str(d['value'])
         elif cls is BuildFile:
             del d['__class__']
