@@ -662,7 +662,12 @@ def build_dir_maker(p: Path|None = None, use_tmp: bool = False, cleanup: bool = 
     multiple=True,
     default=BUILD_DEFAULT.to_str().split('|'),
 )
-def main(build_dir, project_lib_dir, custom_lib_dir, repo_name, use_tmp, build_types):
+@click.option(
+    '--macos-arch',
+    type=click.Choice(['x86_64', 'arm64']),
+    required=False,
+)
+def main(build_dir, project_lib_dir, custom_lib_dir, repo_name, use_tmp, build_types, macos_arch):
     build_types = BuildType.from_str('|'.join(build_types))
 
     with build_dir_maker(build_dir, use_tmp) as real_build_dir:
@@ -676,7 +681,7 @@ def main(build_dir, project_lib_dir, custom_lib_dir, repo_name, use_tmp, build_t
         src_asset = [a for a in release.assets.values() if a.type & 'source']
         assert len(src_asset) == 1
         src_asset = src_asset[0]
-        with Builder(release, src_asset, custom_lib_dir) as builder:
+        with Builder(release, src_asset, custom_lib_dir, macos_arch) as builder:
             build_files = builder.build()
         fn = custom_lib_dir / 'build-meta.json'
         fn.write_text(jsonfactory.dumps(build_files, indent=2))

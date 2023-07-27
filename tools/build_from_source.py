@@ -20,10 +20,11 @@ def sh(cmd_str, check=True, **kwargs):
     return subprocess.run(shlex.split(cmd_str), check=check, **kwargs)
 
 class Builder:
-    def __init__(self, release, asset, lib_dest: Path):
+    def __init__(self, release, asset, lib_dest: Path, macos_arch: str|None = None):
         self.release = release
         self.asset = asset
         self.lib_dest = lib_dest
+        self.macos_arch = macos_arch
         self.tmpdir = None
         self.source_dir = None
         self.cmake_build_dir = None
@@ -78,8 +79,9 @@ class Builder:
         self.cmake_build_dir = self.source_dir / 'build'
         self.cmake_build_dir.mkdir()
         cmake_args = ''
-        if OS_TYPE == BuildType.macos:
-            cmake_args = f'{cmake_args} -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"'
+        if OS_TYPE == BuildType.macos and self.macos_arch is not None:
+            logger.success('adding OSX_ARCHITECTURES')
+            cmake_args = f'{cmake_args} -DCMAKE_OSX_ARCHITECTURES="{self.macos_arch}"'
         sh(f'cmake {cmake_args} -S {self.source_dir} -B {self.cmake_build_dir}')
         logger.debug(f'chdir to {self.cmake_build_dir}')
         os.chdir(self.cmake_build_dir)
