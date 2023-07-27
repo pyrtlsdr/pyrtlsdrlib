@@ -58,6 +58,7 @@ jobs:
         run: pipenv run python -m build -w
         env:
           PYRTLSDRLIB_PLATFORM: ${{ matrix.platform-name }}
+          PYRTLSDRLIB_ARCH: ${{ matrix.arch }}
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:

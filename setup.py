@@ -3,10 +3,11 @@ import sys
 import platform
 from setuptools import setup, find_namespace_packages
 
-MACOSX_VERSIONS = '.'.join([
-    'macosx_10_6_x86_64',  # for compatibility with pip < v21
-    'macosx_10_6_universal2',
-])
+MACOSX_VERSIONS = {
+    None:'macosx',
+    'x86_64':'macosx_10_6_x86_64',
+    'arm64':'macosx_10_6_arm64'
+}
 
 def get_os_type():
     if 'PYRTLSDRLIB_PLATFORM' in os.environ:
@@ -26,6 +27,9 @@ def get_os_type():
     #     else:
     #         return 'win32'
     # return 'unknown'
+
+def get_os_arch():
+    return os.environ.get('PYRTLSDRLIB_ARCH')
 
 OS_TYPE = get_os_type()
 
@@ -56,7 +60,7 @@ else:
 
         def get_tag(self):
             if OS_TYPE == 'macos':
-                oses = MACOSX_VERSIONS
+                oses = MACOSX_VERSIONS[get_os_arch()]
             elif OS_TYPE == 'win32':
                 oses = 'win32'
             elif OS_TYPE == 'win64':
