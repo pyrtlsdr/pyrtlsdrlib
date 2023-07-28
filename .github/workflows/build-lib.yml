@@ -43,7 +43,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt-get install -y libusb-1.0-0-dev
+          yum install -y libusbx-devel
           $PY_PATH -m pip install pygithub requests loguru build json-object-factory click pytest
 
       - name: Build librtlsdr source
