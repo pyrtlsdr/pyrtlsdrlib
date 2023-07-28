@@ -21,7 +21,7 @@ jobs:
             arch: 'arm64'
             bottle-tag: 'arm64_monterey'
           - os: windows-latest
-            platform: win64
+            platform-name: win64
             arch: AMD64
     runs-on:
       ${{ matrix.os }}
