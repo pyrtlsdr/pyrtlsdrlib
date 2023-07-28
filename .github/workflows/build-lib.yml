@@ -11,14 +11,63 @@ on:
     #     type: boolean
 
 jobs:
-  build:
+  build-linux:
+    runs-on:
+      ubuntu-latest
+    container:
+      image: quay.io/pypa/manylinux_2_28_x86_64
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: MatteoH2O1999/setup-python@v1
+        with:
+          python-version: '3.10.8'
+          cache-build: true
+          cache: 'pipenv'
+      - name: Show Platform Info
+        run: python -c "import platform;print(platform.uname())"
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get install -y libusb-1.0-0-dev
+          python -m pip install pipenv
+          pipenv install --dev
+
+      - name: Build librtlsdr source
+        run: pipenv run python tools/get_releases.py --build-types source
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Test custom build
+        run: pipenv run py.test tests/test_custom_build.py
+
+      - name: Build wheel
+        run: pipenv run python -m build -w
+        env:
+          PYRTLSDRLIB_PLATFORM: 'linux'
+          PYRTLSDRLIB_ARCH: 'x86_64'
+
+      - name: Audit Wheel
+        run: |
+          pipenv install auditwheel
+          ls -alh dist
+          auditwheel show dist/*
+      - name: Repair Wheel
+        run: |
+          auditwheel repair dist/*
+          ls -alh wheelhouse
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: 'dists'
+          path: 'wheelhouse/*'
+
+
+  build-other:
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
-            platform-name: 'linux'
-            arch: 'x86_64'
           - os: macos-latest
             platform-name: 'macos'
             arch: 'x86_64'
@@ -40,10 +89,6 @@ jobs:
           python-version: '3.10.8'
           cache-build: true
           cache: 'pipenv'
-      - name: Install build deps
-        run:
-          sudo apt-get install -y libusb-1.0-0-dev
-        if: ${{ matrix.platform-name == 'linux' }}
       - name: Install libusb
         run: |
           brew uninstall --ignore-dependencies libusb
@@ -61,7 +106,7 @@ jobs:
       - name: Install dependencies
         run: pipenv install --dev
 
-      # Linux and macos
+      # macos
       - name: Build librtlsdr source
         run: pipenv run python tools/get_releases.py --build-types source --macos-arch=$MACOS_ARCH
         if: ${{ matrix.platform-name != 'win64' }}
@@ -102,7 +147,7 @@ jobs:
           path: 'dist/*'
 
   test:
-    needs: build
+    needs: [build-linux, build-other]
     strategy:
       fail-fast: false
       matrix:
