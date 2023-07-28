@@ -12,6 +12,8 @@ on:
 
 jobs:
   build-linux:
+    env:
+      PY_PATH: '/opt/python/cp310-cp310m'
     strategy:
       fail-fast: false
       matrix:
@@ -30,42 +32,34 @@ jobs:
       image: ${{ matrix.image-name }}
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python
-        id: setup-python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10.12'
-          cache: 'pipenv'
+
       - name: Show Platform Info
         run: |
           uname -a
-          echo "python path: ${{ steps.setup-python.outputs.python-path }}"
-          which python
-          python -V
-          python -c "import distutils;print(distutils.util.get_platform())"
+          echo "python path: $PY_PATH"
+          ${{ env.PY_PATH }} -V
+          ${{ env.PY_PATH }} -c "import distutils;print(distutils.util.get_platform())"
 
       - name: Install dependencies
         run: |
           sudo apt-get install -y libusb-1.0-0-dev
-          python -m pip install pipenv
-          pipenv install --dev
+          ${{ env.PY_PATH }} -m pip install pygithub requests loguru build json-object-factory click pytest
 
       - name: Build librtlsdr source
-        run: pipenv run python tools/get_releases.py --build-types source
+        run: ${{ env.PY_PATH }} tools/get_releases.py --build-types source
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Test custom build
-        run: pipenv run py.test tests/test_custom_build.py
+        run: ${{ env.PY_PATH }} -m pytest tests/test_custom_build.py
 
       - name: Build wheel
-        run: pipenv run python -m build -w
+        run: ${{ env.PY_PATH }} -m build -w
         env:
           PYRTLSDRLIB_PLATFORM: 'linux'
           PYRTLSDRLIB_ARCH: 'x86_64'
 
       - name: Audit Wheel
         run: |
-          pipenv install auditwheel
           ls -alh dist
           auditwheel show dist/*
       - name: Repair Wheel
