@@ -46,6 +46,7 @@ jobs:
           yum install -y libusbx-devel
           $PY_PATH -m venv venv
           ./venv/bin/python -m pip install pygithub requests loguru build json-object-factory click pytest
+          ./venv/bin/python -m pip install -e .
 
       - name: Build librtlsdr source
         run: ./venv/bin/python tools/get_releases.py --build-types source
