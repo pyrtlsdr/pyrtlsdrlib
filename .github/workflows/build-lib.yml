@@ -19,10 +19,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
-        uses: MatteoH2O1999/setup-python@v1
+        uses: actions/setup-python@v4
         with:
           python-version: '3.10.12'
-          cache-build: true
           cache: 'pipenv'
       - name: Show Platform Info
         run: python -c "import platform;print(platform.uname())"
