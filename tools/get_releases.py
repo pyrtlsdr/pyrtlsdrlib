@@ -588,7 +588,7 @@ def copy_builds_to_project(build_dir: Path = BUILD_DIR, dest_dir: Path = PROJECT
             else:
                 raise RuntimeError(f'Unknown build type: {f.built_type}')
             dest_fn = dest_dir / dest_fn
-            if f.is_symlink() or f.filename.is_symlink():
+            if f.is_symlink or f.filename.is_symlink():
                 symlinks.append((f, f_rel, dest_fn))
                 continue
             logger.debug(f'copying {f.filename} to {dest_fn}')
