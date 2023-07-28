@@ -74,6 +74,12 @@ jobs:
         run: pipenv run py.test tests/test_repo_build.py
         if: ${{ matrix.platform-name == 'win64' }}
 
+      - name: Build win32 wheel
+        run: pipenv run python -m build -w
+        env:
+          PYRTLSDRLIB_PLATFORM: 'win32'
+
+
 
       - name: Build wheel
         run: pipenv run python -m build -w
