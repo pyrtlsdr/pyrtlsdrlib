@@ -45,26 +45,23 @@ jobs:
         run: |
           yum install -y libusbx-devel
           $PY_PATH -m venv venv
-          source venv/bin/activate
-          which python
-          python -m pip install pygithub requests loguru build json-object-factory click pytest
+          ./venv/bin/python -m pip install pygithub requests loguru build json-object-factory click pytest
 
       - name: Build librtlsdr source
-        run: python tools/get_releases.py --build-types source
+        run: ./venv/bin/python tools/get_releases.py --build-types source
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Test custom build
-        run: python -m pytest tests/test_custom_build.py
+        run: ./venv/bin/python -m pytest tests/test_custom_build.py
 
       - name: Build wheel
-        run: python -m build -w
+        run: ./venv/bin/python -m build -w
         env:
           PYRTLSDRLIB_PLATFORM: 'linux'
           PYRTLSDRLIB_ARCH: 'x86_64'
 
       - name: Audit Wheel
         run: |
-          deactivate
           ls -alh dist
           auditwheel show dist/*
       - name: Repair Wheel
