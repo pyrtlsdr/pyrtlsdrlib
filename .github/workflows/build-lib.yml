@@ -20,10 +20,10 @@ jobs:
         include:
           - image-name: quay.io/pypa/manylinux_2_24_x86_64:2022-12-26-0d38463
             abi: manylinux_2_24
-            pkg-mgr: dnf
+            pkg-mgr: yum
           - image-name: quay.io/pypa/manylinux_2_28_x86_64:2023-07-14-55e4124
             abi: manylinux_2_28
-            pgk-mgr: yum
+            pgk-mgr: dnf
           - image-name: quay.io/pypa/manylinux2014_x86_64:2023-07-14-55e4124
             abi: manylinux2014
             pkg-mgr: yum
