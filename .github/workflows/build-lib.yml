@@ -12,10 +12,17 @@ on:
 
 jobs:
   build-linux:
+    strategy:
+      matrix:
+        include:
+          - image-name: quay.io/pypa/manylinux_2_28_x86_64
+            abi: manylinux_2_28
+          - image-name: quay.io/pypa/manylinux2014_x86_64
+            abi: manylinux2014
     runs-on:
       ubuntu-latest
     container:
-      image: quay.io/pypa/manylinux_2_28_x86_64
+      image: ${{ matrix.image-name }}
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
