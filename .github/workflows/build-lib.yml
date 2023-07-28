@@ -13,7 +13,7 @@ on:
 jobs:
   build-linux:
     env:
-      PY_PATH: '/opt/python/cp310-cp310m'
+      PY_PATH: '/opt/python/cp310-cp310'
     strategy:
       fail-fast: false
       matrix:
