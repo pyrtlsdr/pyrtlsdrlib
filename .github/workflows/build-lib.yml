@@ -159,8 +159,7 @@ jobs:
           name: 'dists'
           path: dist
       - name: Publish to PyPI
-        env:
-          TWINE_REPOSITORY: ${{ secrets.PYPI_REPOSITORY }}
-          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-        run: twine upload dist/*
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_TEST_PASSWORD }}
+          repository-url: https://test.pypi.org/legacy/
