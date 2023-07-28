@@ -31,7 +31,9 @@ jobs:
           python-version: '3.10.12'
           cache: 'pipenv'
       - name: Show Platform Info
-        run: python -c "import platform;print(platform.uname())"
+        run: |
+          uname -a
+          python -c "import distutils;print(distutils.util.get_platform())"
 
       - name: Install dependencies
         run: |
