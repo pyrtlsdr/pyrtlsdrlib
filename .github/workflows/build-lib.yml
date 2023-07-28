@@ -23,7 +23,7 @@ jobs:
             pkg-mgr: yum
           - image-name: quay.io/pypa/manylinux_2_28_x86_64:2023-07-14-55e4124
             abi: manylinux_2_28
-            pgk-mgr: dnf
+            pkg-mgr: dnf
           - image-name: quay.io/pypa/manylinux2014_x86_64:2023-07-14-55e4124
             abi: manylinux2014
             pkg-mgr: yum
