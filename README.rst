@@ -1,11 +1,40 @@
 pyrtlsdrlib
 ===========
 
-Experimental project with the goal of providing pre-built binaries of `librtlsdr`_.
-This should allow for installation alongside `pyrtlsdr`_ for Windows and MacOS
-users via ``pip``.
+Description
+-----------
 
-This is currently in early development and still a work in progress.
+A helper for `pyrtlsdr`_ that includes pre-built binaries of `librtlsdr`_
+(which pyrtlsdr depends on).
+
+Contains libraries build for the following systems:
+
+- Ubuntu Linux
+- Mac OSX (Intel)
+- Mac OSX (M1 / arm64)
+- Windows (32 and 64 bit)
+
+
+Installation
+------------
+
+Install directly with ``pip``
+
+.. note::
+
+    Install via pip is coming soon, but is not yet available
+
+.. code:: bash
+
+    pip install pyrtlsdrlib
+
+
+Or as an "extra" dependency of pyrtlsdr
+
+.. code:: bash
+
+    pip install pyrtlsdr[lib]
+
 
 
 .. _librtlsdr: https://github.com/librtlsdr/librtlsdr
