@@ -1,7 +1,14 @@
 name: Build librtlsdr
 
 on:
+  push:
+    branches: ['pypi-test']
   workflow_dispatch:
+    # inputs:
+    #   allow_deploy:
+    #     description: 'Deploy with twine'
+    #     required: true
+    #     type: boolean
 
 jobs:
   build:
@@ -131,3 +138,29 @@ jobs:
 
       - name: Test rtlsdr import
         run: python -c 'import rtlsdr;'
+
+
+  deploy:
+    needs: test
+    # if: ${{ success() && (github.event.inputs.allow_deploy == 'true') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel twine
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: 'dists'
+          path: dist
+      - name: Publish to PyPI
+        env:
+          TWINE_REPOSITORY: ${{ secrets.PYPI_REPOSITORY }}
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: twine upload dist/*
