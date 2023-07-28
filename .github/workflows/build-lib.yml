@@ -51,15 +51,30 @@ jobs:
         if: ${{ matrix.platform-name == 'win64' }}
       - name: Install dependencies
         run: pipenv install --dev
+
+      # Linux and macos
       - name: Build librtlsdr source
         run: pipenv run python tools/get_releases.py --build-types source --macos-arch=$MACOS_ARCH
+        if: ${{ matrix.platform-name != 'win64' }}
         env:
           MACOS_ARCH: ${{ matrix.arch }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Test custom build
         run: pipenv run py.test tests/test_custom_build.py
+        if: ${{ matrix.platform-name != 'win64' }}
         env:
           MACOS_ARCH: ${{ matrix.arch }}
+
+      # Windows
+      - name: Get librtlsdr release
+        run: pipenv run python tools/get_releases.py --build-types windows --build-types w32 --build-types w64 --build-types static
+        if: ${{ matrix.platform-name == 'win64' }}
+
+      - name: Test build
+        run: pipenv run py.test tests/test_repo_build.py
+        if: ${{ matrix.platform-name == 'win64' }}
+
+
       - name: Build wheel
         run: pipenv run python -m build -w
         env:
