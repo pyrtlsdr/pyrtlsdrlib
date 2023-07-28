@@ -36,6 +36,7 @@ jobs:
       - name: Show Platform Info
         run: |
           uname -a
+          ls -al /opt/python
           echo "python path: $PY_PATH"
           ${{ env.PY_PATH }} -V
           ${{ env.PY_PATH }} -c "import distutils;print(distutils.util.get_platform())"
