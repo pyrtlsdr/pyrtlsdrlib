@@ -18,9 +18,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - image-name: quay.io/pypa/manylinux_2_24_x86_64:2022-12-26-0d38463
-            abi: manylinux_2_24
-            pkg-mgr: yum
           - image-name: quay.io/pypa/manylinux_2_28_x86_64:2023-07-14-55e4124
             abi: manylinux_2_28
             pkg-mgr: dnf
