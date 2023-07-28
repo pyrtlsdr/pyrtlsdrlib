@@ -16,11 +16,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - image-name: quay.io/pypa/manylinux_2_28_x86_64
+          - image-name: quay.io/pypa/manylinux_2_28_x86_64:2023-07-14-55e4124
             abi: manylinux_2_28
-          - image-name: quay.io/pypa/manylinux2014_x86_64
+          - image-name: quay.io/pypa/manylinux2014_x86_64:2023-07-14-55e4124
             abi: manylinux2014
-          - image-name: quay.io/pypa/manylinux2010_x86_64
+          - image-name: quay.io/pypa/manylinux2010_x86_64:2022-08-05-4535177
             abi: manylinux2010
     runs-on:
       ubuntu-latest
