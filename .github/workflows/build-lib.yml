@@ -205,6 +205,8 @@ jobs:
     needs: test
     if: ${{ success() && (github.event.inputs.allow_deploy == 'true') }}
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v2
@@ -213,5 +215,3 @@ jobs:
           path: dist
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_PASSWORD }}

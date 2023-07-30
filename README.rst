@@ -20,10 +20,6 @@ Installation
 
 Install directly with ``pip``
 
-.. note::
-
-    Install via pip is coming soon, but is not yet available
-
 .. code:: bash
 
     pip install pyrtlsdrlib
