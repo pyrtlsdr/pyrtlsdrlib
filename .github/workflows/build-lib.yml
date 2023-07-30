@@ -2,13 +2,15 @@ name: Build librtlsdr
 
 on:
   push:
-    branches: ['pypi-test']
+    branches: ['main']
+  pull_request:
+    branches: ['main']
   workflow_dispatch:
-    # inputs:
-    #   allow_deploy:
-    #     description: 'Deploy with twine'
-    #     required: true
-    #     type: boolean
+    inputs:
+      allow_deploy:
+        description: 'Deploy with twine'
+        required: true
+        type: boolean
 
 jobs:
   build-linux:
@@ -201,7 +203,7 @@ jobs:
 
   deploy:
     needs: test
-    # if: ${{ success() && (github.event.inputs.allow_deploy == 'true') }}
+    if: ${{ success() && (github.event.inputs.allow_deploy == 'true') }}
     runs-on: ubuntu-latest
     steps:
       - name: Download artifacts
@@ -212,5 +214,4 @@ jobs:
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          password: ${{ secrets.PYPI_TEST_PASSWORD }}
-          repository-url: https://test.pypi.org/legacy/
+          password: ${{ secrets.PYPI_PASSWORD }}
