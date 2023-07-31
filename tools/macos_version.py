@@ -1,4 +1,4 @@
-
+import argparse
 import distutils.util
 
 VERSION_NAMES = {
@@ -16,4 +16,20 @@ def get_current_version_name() -> str:
     return get_named_version(version)
 
 if __name__ == '__main__':
-    print(get_current_version_name())
+    p = argparse.ArgumentParser()
+    p.add_argument('--force-version', dest='force_version')
+    args = p.parse_args()
+    if args.force_version is not None:
+        if '-' in args.force_version:
+            version = None
+            for v in args.force_version.split('-'):
+                if v.isdigit():
+                    version = v
+                    break
+            if version is None:
+                raise ValueError(f'Could not parse version from "{args.force_version}"')
+        else:
+            version = args.force_version
+        print(get_named_version(version))
+    else:
+        print(get_current_version_name())

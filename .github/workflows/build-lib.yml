@@ -97,7 +97,7 @@ jobs:
       - name: Get macos info
         id: macos-info
         run: |
-          BOTTLE_TAG=$(python tools/macos_version.py)
+          BOTTLE_TAG=$(python tools/macos_version.py --force-version ${{ matrix.os }})
           echo "BOTTLE_TAG=${{ matrix.arch }}_${BOTTLE_TAG}"
           echo "BOTTLE_TAG=${{ matrix.arch }}_${BOTTLE_TAG}" >> $GITHUB_OUTPUT
         if: ${{ startsWith(matrix.os, 'macos') }}
