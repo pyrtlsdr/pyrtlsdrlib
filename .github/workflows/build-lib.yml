@@ -101,9 +101,11 @@ jobs:
           echo "BOTTLE_TAG=$BOTTLE_TAG"
           echo "BOTTLE_TAG=$BOTTLE_TAG" >> $GITHUB_OUTPUT
         if: ${{ startsWith(matrix.os, 'macos') }}
+      - name: Uninstall libusb
+        if: ${{ startsWith(matrix.os, 'macos') && matrix.os != 'macos-11' }}
+        run: brew uninstall --ignore-dependencies libusb
       - name: Install libusb
         run: |
-          brew uninstall --ignore-dependencies libusb
           brew fetch --force --bottle-tag $BOTTLE_TAG libusb
           export BOTTLE_PATH=$(brew --cache --bottle-tag=$BOTTLE_TAG libusb)
           brew install $BOTTLE_PATH
