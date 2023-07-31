@@ -98,8 +98,8 @@ jobs:
         id: macos-info
         run: |
           BOTTLE_TAG=$(python tools/macos_version.py)
-          echo "BOTTLE_TAG=$BOTTLE_TAG"
-          echo "BOTTLE_TAG=$BOTTLE_TAG" >> $GITHUB_OUTPUT
+          echo "BOTTLE_TAG=${BOTTLE_TAG}_${{ matrix.arch }}"
+          echo "BOTTLE_TAG=${BOTTLE_TAG}_${{ matrix.arch }}" >> $GITHUB_OUTPUT
         if: ${{ startsWith(matrix.os, 'macos') }}
       - name: Uninstall libusb
         if: ${{ startsWith(matrix.os, 'macos') && matrix.os != 'macos-11' }}
