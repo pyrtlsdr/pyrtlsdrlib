@@ -98,7 +98,8 @@ jobs:
         id: macos-info
         run: |
           BOTTLE_TAG=$(python tools/macos_version.py)
-          echo "data={\"BOTTLE_TAG\":\"$BOTTLE_TAG\", \"PLATFORM_NAME\":\"macos\"}" >> $GITHUB_OUTPUT
+          echo "BOTTLE_TAG=$BOTTLE_TAG"
+          echo "BOTTLE_TAG=$BOTTLE_TAG" >> $GITHUB_OUTPUT
         if: ${{ startsWith(matrix.os, 'macos') }}
       - name: Install libusb
         run: |
@@ -108,7 +109,7 @@ jobs:
           brew install $BOTTLE_PATH
         if: ${{ startsWith(matrix.os, 'macos') }}
         env:
-          BOTTLE_TAG: ${{ steps.macos-info.outputs.data.BOTTLE_TAG }}
+          BOTTLE_TAG: ${{ steps.macos-info.outputs.BOTTLE_TAG }}
       - name: Install pipenv
         run: python -m pip install pipenv
       - name: Update Pipfile.lock
