@@ -102,7 +102,8 @@ jobs:
           echo "BOTTLE_TAG=${{ matrix.arch }}_${BOTTLE_TAG}" >> $GITHUB_OUTPUT
         if: ${{ startsWith(matrix.os, 'macos') }}
       - name: Uninstall libusb
-        if: ${{ startsWith(matrix.os, 'macos') && matrix.os != 'macos-11' }}
+        if: ${{ startsWith(matrix.os, 'macos') }}
+        continue-on-error: true
         run: brew uninstall --ignore-dependencies libusb
       - name: Install libusb
         run: |
