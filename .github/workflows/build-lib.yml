@@ -142,11 +142,17 @@ jobs:
         run: pipenv run py.test tests/test_repo_build.py
         if: ${{ startsWith(matrix.os, 'windows') }}
 
-      - name: Build windows wheels
-        run: |
-          PYRTLSDRLIB_ARCH="win32" pipenv run python -m build -w
-          PYRTLSDRLIB_ARCH="win64" pipenv run python -m build -w
+      - name: Build win32 wheel
+        run: pipenv run python -m build -w
         if: ${{ startsWith(matrix.os, 'windows') }}
+        env:
+          PYRTLSDRLIB_ARCH: win32
+
+      - name: Build win64 wheel
+        run: pipenv run python -m build -w
+        if: ${{ startsWith(matrix.os, 'windows') }}
+        env:
+          PYRTLSDRLIB_ARCH: win64
 
       - name: Build macos wheel
         run: pipenv run python -m build -w
