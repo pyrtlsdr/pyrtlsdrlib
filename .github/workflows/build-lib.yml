@@ -79,17 +79,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        os: [macos-11, macos-12, macos-13]
+        arch: [x86_64, arm64]
         include:
-          - os: macos-latest
-            platform-name: 'macos'
-            arch: 'x86_64'
-            bottle-tag: 'monterey'
-          - os: macos-latest
-            platform-name: 'macos'
-            arch: 'arm64'
-            bottle-tag: 'arm64_monterey'
           - os: windows-latest
-            platform-name: win64
             arch: AMD64
     runs-on:
       ${{ matrix.os }}
@@ -101,57 +94,64 @@ jobs:
           python-version: '3.10.12'
           cache-build: true
           cache: 'pipenv'
+      - name: Get macos info
+        id: macos-info
+        run: |
+          BOTTLE_TAG=$(python tools/macos_version.py)
+          echo "data={\"BOTTLE_TAG\":\"$BOTTLE_TAG\", \"PLATFORM_NAME\":\"macos\"}" >> $GITHUB_OUTPUT
+        if: ${{ startsWith(matrix.os, 'macos') }}
       - name: Install libusb
         run: |
           brew uninstall --ignore-dependencies libusb
           brew fetch --force --bottle-tag $BOTTLE_TAG libusb
           export BOTTLE_PATH=$(brew --cache --bottle-tag=$BOTTLE_TAG libusb)
           brew install $BOTTLE_PATH
-        if: ${{ matrix.platform-name == 'macos' }}
+        if: ${{ startsWith(matrix.os, 'macos') }}
         env:
-          BOTTLE_TAG: ${{ matrix.bottle-tag }}
+          BOTTLE_TAG: ${{ steps.macos-info.outputs.data.BOTTLE_TAG }}
       - name: Install pipenv
         run: python -m pip install pipenv
       - name: Update Pipfile.lock
         run: pipenv lock
-        if: ${{ matrix.platform-name == 'win64' }}
+        if: ${{ startsWith(matrix.os, 'windows') }}
       - name: Install dependencies
         run: pipenv install --dev
 
       # macos
       - name: Build librtlsdr source
         run: pipenv run python tools/get_releases.py --build-types source --macos-arch=$MACOS_ARCH
-        if: ${{ matrix.platform-name != 'win64' }}
+        if: ${{ startsWith(matrix.os, 'macos') }}
         env:
           MACOS_ARCH: ${{ matrix.arch }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Test custom build
         run: pipenv run py.test tests/test_custom_build.py
-        if: ${{ matrix.platform-name != 'win64' }}
+        if: ${{ startsWith(matrix.os, 'macos') }}
         env:
           MACOS_ARCH: ${{ matrix.arch }}
 
       # Windows
       - name: Get librtlsdr release
         run: pipenv run python tools/get_releases.py --build-types windows --build-types w32 --build-types w64 --build-types static
-        if: ${{ matrix.platform-name == 'win64' }}
+        if: ${{ startsWith(matrix.os, 'windows') }}
 
       - name: Test build
         run: pipenv run py.test tests/test_repo_build.py
-        if: ${{ matrix.platform-name == 'win64' }}
+        if: ${{ startsWith(matrix.os, 'windows') }}
 
-      - name: Build win32 wheel
+      - name: Build windows wheels
+        run: |
+          PYRTLSDRLIB_ARCH="win32" pipenv run python -m build -w
+          PYRTLSDRLIB_ARCH="win64" pipenv run python -m build -w
+        if: ${{ startsWith(matrix.os, 'windows') }}
+
+      - name: Build macos wheel
         run: pipenv run python -m build -w
         env:
-          PYRTLSDRLIB_PLATFORM: 'win32'
-
-
-
-      - name: Build wheel
-        run: pipenv run python -m build -w
-        env:
-          PYRTLSDRLIB_PLATFORM: ${{ matrix.platform-name }}
+          PYRTLSDRLIB_PLATFORM: macos
           PYRTLSDRLIB_ARCH: ${{ matrix.arch }}
+        if: ${{ startsWith(matrix.os, 'macos') }}
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -163,7 +163,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-11, macos-12, macos-13, windows-latest]
         python-version: ["3.8", "3.9", "3.10", "3.11"]
     runs-on:
       ${{ matrix.os }}
