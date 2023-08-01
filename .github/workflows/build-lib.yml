@@ -191,10 +191,9 @@ jobs:
           ref: rtlsdrlib-integration
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: MatteoH2O1999/setup-python@v1
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-          cache-build: true
 
       - name: Download artifacts
         uses: actions/download-artifact@v2
