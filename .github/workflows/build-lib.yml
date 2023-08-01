@@ -168,11 +168,13 @@ jobs:
       - name: Build win32 wheel
         run: pipenv run python -m build -w
         env:
+          PYRTLSDRLIB_PLATFORM: windows
           PYRTLSDRLIB_ARCH: win32
 
       - name: Build win64 wheel
         run: pipenv run python -m build -w
         env:
+          PYRTLSDRLIB_PLATFORM: windows
           PYRTLSDRLIB_ARCH: win64
 
       - name: Test wheel files
