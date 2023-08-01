@@ -1,6 +1,7 @@
 import os
 import sys
 import platform
+import distutils.util
 from setuptools import setup, find_namespace_packages
 
 MACOSX_VERSIONS = {
@@ -29,7 +30,7 @@ def get_os_type():
     # return 'unknown'
 
 def get_os_arch():
-    return os.environ.get('PYRTLSDRLIB_ARCH')
+    return os.environ.get('PYRTLSDRLIB_ARCH', platform.machine())
 
 OS_TYPE = get_os_type()
 
@@ -59,15 +60,27 @@ else:
         """Create OS-dependent, but Python-independent wheels."""
 
         def get_tag(self):
+            oses = None
             if OS_TYPE == 'macos':
-                oses = MACOSX_VERSIONS[get_os_arch()]
-            elif OS_TYPE == 'win32':
-                oses = 'win32'
-            elif OS_TYPE == 'win64':
-                oses = 'win_amd64'
+                arch = get_os_arch()
+                os_ver = distutils.util.get_macosx_target_ver().split('.')[0]
+                oses = f'macosx_{os_ver}_0_{arch}'
+            elif OS_TYPE.lower().startswith('win'):
+                arch = get_os_arch()
+                if arch is not None:
+                    if '32' in arch:
+                        oses = 'win32'
+                    elif '64' in arch:
+                        oses = 'win_amd64'
+                    else:
+                        raise ValueError(f'Invalid value "{arch}" for "PYRTLSDRLIB_ARCH"')
+                elif OS_TYPE == 'win32':
+                    oses = 'win32'
+                elif OS_TYPE == 'win64':
+                    oses = 'win_amd64'
             elif OS_TYPE == 'linux':
                 oses = 'linux_x86_64'
-            else:
+            if oses is None:
                 oses = 'any'
             return 'py3', 'none', oses
 
