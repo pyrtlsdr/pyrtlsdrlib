@@ -67,6 +67,9 @@ jobs:
         run: |
           auditwheel repair dist/*
           ls -alh wheelhouse
+          rm dist/*
+      - name: Test wheel files
+        run: ./venv/bin/python -m pytest tests/test_wheel_files.py
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
@@ -129,6 +132,9 @@ jobs:
           PYRTLSDRLIB_PLATFORM: macos
           PYRTLSDRLIB_ARCH: ${{ matrix.arch }}
 
+      - name: Test wheel files
+        run: pipenv run py.test tests/test_wheel_files.py
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -168,6 +174,9 @@ jobs:
         run: pipenv run python -m build -w
         env:
           PYRTLSDRLIB_ARCH: win64
+
+      - name: Test wheel files
+        run: pipenv run py.test tests/test_wheel_files.py
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
