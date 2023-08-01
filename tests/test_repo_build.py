@@ -20,3 +20,10 @@ def test_repo_build_loads(package_lib_root):
     assert dll is not None
     dll_file = Path(dll._name)
     assert dll_file.parent == package_lib_root
+
+def test_no_platform_free_wheels_exist():
+    pkg_dirs = [Path(name) for name in ['dist', 'wheelhouse'] if Path(name).exists()]
+    assert len(pkg_dirs)
+    for pkg_dir in pkg_dirs:
+        l = [f for f in pkg_dir.glob('*-none-any.whl')]
+        assert not len(l)
