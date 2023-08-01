@@ -72,7 +72,8 @@ else:
                         oses = 'win32'
                     elif '64' in arch:
                         oses = 'win_amd64'
-                    raise ValueError(f'Invalid value "{arch}" for "PYRTLSDRLIB_ARCH"')
+                    else:
+                        raise ValueError(f'Invalid value "{arch}" for "PYRTLSDRLIB_ARCH"')
                 elif OS_TYPE == 'win32':
                     oses = 'win32'
                 elif OS_TYPE == 'win64':
