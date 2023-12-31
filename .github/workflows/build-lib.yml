@@ -23,9 +23,19 @@ jobs:
           - image-name: quay.io/pypa/manylinux_2_28_x86_64:2023-07-14-55e4124
             abi: manylinux_2_28
             pkg-mgr: dnf
+            arch: x86_64
           - image-name: quay.io/pypa/manylinux2014_x86_64:2023-07-14-55e4124
             abi: manylinux2014
             pkg-mgr: yum
+            arch: x86_64
+          - image-name: quay.io/pypa/manylinux_2_28_aarch64:2023-07-14-55e4124
+            abi: manylinux_2_28
+            pkg-mgr: dnf
+            arch: aarch64
+          - image-name: quay.io/pypa/manylinux2014_aarch64:2023-07-14-55e4124
+            abi: manylinux2014
+            pkg-mgr: yum
+            arch: aarch64
     runs-on:
       ubuntu-latest
     container:
@@ -59,7 +69,7 @@ jobs:
         run: ./venv/bin/python -m build -w
         env:
           PYRTLSDRLIB_PLATFORM: 'linux'
-          PYRTLSDRLIB_ARCH: 'x86_64'
+          PYRTLSDRLIB_ARCH: ${{ matrix.arch }}
 
       - name: Audit Wheel
         run: |
