@@ -28,11 +28,11 @@ jobs:
             abi: manylinux2014
             pkg-mgr: yum
             arch: x86_64
-          - image-name: quay.io/pypa/manylinux_2_28_aarch64:2023-07-14-55e4124
+          - image-name: quay.io/pypa/manylinux_2_28_aarch64:2023-12-27-ecd5ca0
             abi: manylinux_2_28
             pkg-mgr: dnf
             arch: aarch64
-          - image-name: quay.io/pypa/manylinux2014_aarch64:2023-07-14-55e4124
+          - image-name: quay.io/pypa/manylinux2014_aarch64:2023-12-27-ecd5ca0
             abi: manylinux2014
             pkg-mgr: yum
             arch: aarch64
