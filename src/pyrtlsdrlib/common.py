@@ -15,6 +15,9 @@ class BuildType(enum.Flag):
     ubuntu = enum.auto()
     source = enum.auto()
 
+    x86_64 = enum.auto()
+    aarch64 = enum.auto()
+
     w32 = enum.auto()
     w64 = enum.auto()
     dlldep = enum.auto()
