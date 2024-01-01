@@ -27,11 +27,12 @@ echo "Testing build"
 $PY_PATH -m pytest /io/tests/test_custom_build.py
 
 echo "Building wheel"
-$PY_PATH -m build -w /io --outdir /io/wheelhouse
+$PY_PATH -m build -w /io --outdir /io/dist
 
 echo "Repairing wheels"
-ls -al /io/wheelhouse
-for whl in /io/wheelhouse/*.whl; do
+ls -al /io/dist
+for whl in /io/dist/*.whl; do
     auditwheel show "$whl"
-    auditwheel repair "$whl"
+    auditwheel repair "$whl" --wheel-dir /io/wheelhouse
 done
+ls -al /io/wheelhouse
