@@ -28,14 +28,6 @@ jobs:
             abi: manylinux2014
             pkg-mgr: yum
             arch: x86_64
-          - image-name: quay.io/pypa/manylinux_2_28_aarch64:2023-12-27-ecd5ca0
-            abi: manylinux_2_28
-            pkg-mgr: dnf
-            arch: aarch64
-          - image-name: quay.io/pypa/manylinux2014_aarch64:2023-12-27-ecd5ca0
-            abi: manylinux2014
-            pkg-mgr: yum
-            arch: aarch64
     runs-on:
       ubuntu-latest
     container:
@@ -82,6 +74,51 @@ jobs:
           rm dist/*
       - name: Test wheel files
         run: ./venv/bin/python -m pytest tests/test_wheel_files.py
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: 'dists'
+          path: 'wheelhouse/*'
+
+  build-aarch64:
+    env:
+      PY_PATH: '/opt/python/cp310-cp310/bin/python'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image-name: quay.io/pypa/manylinux_2_28_aarch64
+            abi: manylinux_2_28
+            pkg-mgr: dnf
+            arch: aarch64
+          - image-name: quay.io/pypa/manylinux2014_aarch64
+            abi: manylinux2014
+            pkg-mgr: yum
+            arch: aarch64
+    runs-on:
+      ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Build docker env file
+        run: |
+          echo "PYRTLSDR_PLATFORM=linux" >> dockerenv.list
+          echo "PYRTLSDR_ARCH=${{ matrix.arch }}" >> dockerenv.list
+          echo "PY_PATH=$PY_PATH" >> dockerenv.list
+          echo "PKG_MGR=${{ matrix.pkg-mgr }}" >> dockerenv.list
+          echo "PLAT=${{ matrix.abi }}_${{ matrix.arch }}" >> dockerenv.list
+          cat dockerenv.list
+
+      - name: Download image
+        run: docker pull "${{ matrix.image-name }}"
+
+      - name: Build in container
+        run: |
+          docker run -e "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" --env-file dockerenv.list -v `pwd`:/io ${{ matrix.image-name }} /io/.github/build_in_docker.sh
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
@@ -199,7 +236,7 @@ jobs:
           path: 'dist/*'
 
   test:
-    needs: [build-linux, build-macos, build-windows]
+    needs: [build-linux, build-aarch64, build-macos, build-windows]
     strategy:
       fail-fast: false
       matrix:
