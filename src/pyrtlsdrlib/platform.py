@@ -11,7 +11,9 @@ def get_os_type() -> BuildType:
             t |= uname.machine
             return t
     elif uname.system == 'Darwin':
-        return BuildType.macos
+        t = BuildType.macos
+        t |= uname.machine
+        return t
     elif uname.system == 'Windows':
         t = BuildType.windows
         is_64bit = sys.maxsize > 2**32
