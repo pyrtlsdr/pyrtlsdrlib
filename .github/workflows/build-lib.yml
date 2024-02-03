@@ -143,6 +143,7 @@ jobs:
 
       - name: Rename wheel
         shell: python
+        if: ${{ matrix.arch }} == 'arm64'
         run: |
           import distutils.util
           os_version = distutils.util.get_macosx_target_ver().split('.')[0]
