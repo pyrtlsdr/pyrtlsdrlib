@@ -84,8 +84,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-11, macos-12]
-        arch: [x86_64, arm64]
+        include:
+          - os: macos-latest
+            arch: x86_64
+          - os: macos-14
+            arch: arm64
     runs-on:
       ${{ matrix.os }}
     steps:
@@ -96,6 +99,11 @@ jobs:
           python-version: '3.10.12'
           cache-build: true
           cache: 'pipenv'
+      - name: Log native platform info
+        run: |
+          python -c "import platform;print(platform.uname())"
+          python -c "import distutils;print(distutils.util.get_platform())"
+          python tools/macos_version.py
       - name: Get macos info
         id: macos-info
         run: |
