@@ -7,7 +7,9 @@ def get_os_type() -> BuildType:
     uname = platform.uname()
     if uname.system == 'Linux':
         if 'ubuntu' in uname.version.lower():
-            return BuildType.ubuntu
+            t = BuildType.ubuntu
+            t |= uname.machine
+            return t
     elif uname.system == 'Darwin':
         return BuildType.macos
     elif uname.system == 'Windows':

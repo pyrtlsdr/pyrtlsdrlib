@@ -32,7 +32,8 @@ from . import custom_build
 
 BUILD_TYPE_LIB_GLOBS = {
     BuildType.macos: '*.dylib',
-    BuildType.ubuntu: 'librtlsdr.so*',
+    BuildType.ubuntu | BuildType.x86_64: 'librtlsdr.so*',
+    BuildType.ubuntu | BuildType.aarch64: 'librtlsdr.so*',
     BuildType.windows | BuildType.w32: 'librtlsdr_w32*.dll',
     BuildType.windows | BuildType.w64: 'librtlsdr_w64*.dll',
 }
