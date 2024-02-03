@@ -124,7 +124,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install pipenv
-          pipenv install --dev
+          pipenv -v install --dev
 
       - name: Build librtlsdr source
         run: pipenv run python tools/get_releases.py --build-types source --macos-arch=$MACOS_ARCH
