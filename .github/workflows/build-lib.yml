@@ -141,6 +141,20 @@ jobs:
           PYRTLSDRLIB_PLATFORM: macos
           PYRTLSDRLIB_ARCH: ${{ matrix.arch }}
 
+      - name: Rename wheel
+        shell: python
+        run: |
+          import distutils.util
+          os_version = distutils.util.get_macosx_target_ver().split('.')[0]
+          from pathlib import Path
+          dists = Path('dist')
+          arm_wheels = [p for p in dists.glob('*macosx*arm64.whl')]
+          assert len(arm_wheels) == 1, str(arm_wheels)
+          whl = arm_wheels[0]
+          new_whl = whl.with_name(whl.name.replace(f'{os_version}_0', '11_0'))
+          print(f'{whl} > {new_whl}')
+          whl.rename(new_whl)
+
       - name: Test wheel files
         run: pipenv run py.test tests/test_wheel_files.py
 
