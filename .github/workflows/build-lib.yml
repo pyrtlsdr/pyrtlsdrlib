@@ -114,9 +114,7 @@ jobs:
         run: brew uninstall --ignore-dependencies libusb
       - name: Install libusb
         run: |
-          brew fetch --force --bottle-tag $BOTTLE_TAG libusb
-          export BOTTLE_PATH=$(brew --cache --bottle-tag=$BOTTLE_TAG libusb)
-          brew install $BOTTLE_PATH
+          brew install libusb
         env:
           BOTTLE_TAG: ${{ steps.macos-info.outputs.BOTTLE_TAG }}
 
