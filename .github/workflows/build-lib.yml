@@ -103,22 +103,11 @@ jobs:
           python -c "import platform;print(platform.uname())"
           python -c "import distutils;print(distutils.util.get_platform())"
           python tools/macos_version.py
-      - name: Get macos info
-        id: macos-info
-        run: |
-          BOTTLE_TAG=$(python tools/macos_version.py)
-          echo "BOTTLE_TAG=${{ matrix.arch }}_${BOTTLE_TAG}"
-          echo "BOTTLE_TAG=${{ matrix.arch }}_${BOTTLE_TAG}" >> $GITHUB_OUTPUT
       - name: Uninstall libusb
         continue-on-error: true
         run: brew uninstall --ignore-dependencies libusb
       - name: Install libusb
-        run: |
-          brew fetch --force --bottle-tag $BOTTLE_TAG libusb
-          export BOTTLE_PATH=$(brew --cache --bottle-tag=$BOTTLE_TAG libusb)
-          brew install $BOTTLE_PATH
-        env:
-          BOTTLE_TAG: ${{ steps.macos-info.outputs.BOTTLE_TAG }}
+        run: brew install libusb
 
       - name: Install dependencies
         run: |
