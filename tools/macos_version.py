@@ -5,6 +5,7 @@ VERSION_NAMES = {
     '11': 'big_sur',
     '12': 'monterey',
     '13': 'ventura',
+    '14': 'sonoma',
 }
 
 def get_named_version(version: str) -> str:
