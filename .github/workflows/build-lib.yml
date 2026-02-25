@@ -74,7 +74,7 @@ jobs:
         run: ./venv/bin/python -m pytest tests/test_wheel_files.py
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v6
         with:
           name: 'dists'
           path: 'wheelhouse/*'
@@ -149,7 +149,7 @@ jobs:
         run: pipenv run py.test tests/test_wheel_files.py
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v6
         with:
           name: 'dists'
           path: 'dist/*'
@@ -194,7 +194,7 @@ jobs:
         run: pipenv run py.test tests/test_wheel_files.py
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v6
         with:
           name: 'dists'
           path: 'dist/*'
@@ -219,7 +219,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache-build: true
       - name: Download artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v6
         with:
           name: 'dists'
           path: dist
@@ -246,7 +246,7 @@ jobs:
       id-token: write
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v6
         with:
           name: 'dists'
           path: dist
