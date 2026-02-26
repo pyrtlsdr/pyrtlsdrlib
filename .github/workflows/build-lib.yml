@@ -39,7 +39,7 @@ jobs:
           ls -al /opt/python
           echo "python path: $PY_PATH"
           $PY_PATH -V
-          $PY_PATH -c "import distutils;print(distutils.util.get_platform())"
+          $PY_PATH -c "import platform;print(platform.platform())"
 
       - name: Install dependencies
         run: |
@@ -101,7 +101,7 @@ jobs:
       - name: Log native platform info
         run: |
           python -c "import platform;print(platform.uname())"
-          python -c "import distutils;print(distutils.util.get_platform())"
+          python -c "import platform;print(platform.platform())"
           python tools/macos_version.py
       - name: Uninstall libusb
         continue-on-error: true
