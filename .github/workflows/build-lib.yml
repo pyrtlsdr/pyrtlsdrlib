@@ -31,7 +31,7 @@ jobs:
     container:
       image: ${{ matrix.image-name }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
 
       - name: Show Platform Info
         run: |
@@ -92,7 +92,7 @@ jobs:
     runs-on:
       ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
       - name: Set up Python
         uses: MatteoH2O1999/setup-python@v3
         with:
@@ -158,7 +158,7 @@ jobs:
   build-windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
       - name: Set up Python
         uses: MatteoH2O1999/setup-python@v1
         with:
@@ -209,7 +209,7 @@ jobs:
     runs-on:
       ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         with:
           repository: pyrtlsdr/pyrtlsdr
 
