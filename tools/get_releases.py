@@ -485,7 +485,7 @@ class SourceAsset(AssetBase):
     def _get_download_filename(self) -> str:
         return 'source.tar.gz'
 
-@logger.catch
+@logger.catch(reraise=True)
 def extract(
     dest_dir: Path = BUILD_DIR,
     repo_name: str = REPO_NAME,
@@ -526,7 +526,7 @@ def extract(
 
     return results
 
-@logger.catch
+@logger.catch(reraise=True)
 def copy_builds_to_project(build_dir: Path = BUILD_DIR, dest_dir: Path = PROJECT_LIB_DIR):
     build_meta = read_build_meta(build_dir)
     try:
