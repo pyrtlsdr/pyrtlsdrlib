@@ -85,9 +85,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: macos-latest
+          - os: macos-15-intel
             arch: x86_64
-          - os: macos-14
+          - os: macos-latest
             arch: arm64
     runs-on:
       ${{ matrix.os }}
