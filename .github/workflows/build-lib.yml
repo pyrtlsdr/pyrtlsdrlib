@@ -20,18 +20,19 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - image-name: quay.io/pypa/manylinux_2_28_x86_64:2023-07-14-55e4124
+          - image-name: quay.io/pypa/manylinux_2_28_x86_64
             abi: manylinux_2_28
             pkg-mgr: dnf
-          - image-name: quay.io/pypa/manylinux2014_x86_64:2023-07-14-55e4124
-            abi: manylinux2014
-            pkg-mgr: yum
+          # TODO: manylinux2014 is currently broken due glibc version issues. We should fix this and re-enable the manylinux2014 build (if it's still relevant).
+          # - image-name: quay.io/pypa/manylinux2014_x86_64
+          #   abi: manylinux2014
+          #   pkg-mgr: yum
     runs-on:
       ubuntu-latest
     container:
       image: ${{ matrix.image-name }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
 
       - name: Show Platform Info
         run: |
@@ -39,7 +40,7 @@ jobs:
           ls -al /opt/python
           echo "python path: $PY_PATH"
           $PY_PATH -V
-          $PY_PATH -c "import distutils;print(distutils.util.get_platform())"
+          $PY_PATH -c "import platform;print(platform.platform())"
 
       - name: Install dependencies
         run: |
@@ -74,9 +75,9 @@ jobs:
         run: ./venv/bin/python -m pytest tests/test_wheel_files.py
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v6
         with:
-          name: 'dists'
+          name: 'dists-linux-${{ matrix.abi }}'
           path: 'wheelhouse/*'
 
 
@@ -85,24 +86,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: macos-latest
+          - os: macos-15-intel
             arch: x86_64
-          - os: macos-14
+          - os: macos-latest
             arch: arm64
     runs-on:
       ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
       - name: Set up Python
-        uses: MatteoH2O1999/setup-python@v3
+        uses: actions/setup-python@v6
         with:
-          python-version: '3.10.12'
-          cache-build: true
-      - name: Log native platform info
-        run: |
-          python -c "import platform;print(platform.uname())"
-          python -c "import distutils;print(distutils.util.get_platform())"
-          python tools/macos_version.py
+          python-version: '3.13'
       - name: Uninstall libusb
         continue-on-error: true
         run: brew uninstall --ignore-dependencies libusb
@@ -111,92 +106,103 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install pipenv
-          pipenv install --dev
+          python -m pip install -U pip setuptools
+          pip install pygithub requests loguru build json-object-factory click pytest build
+          pip install -e .
+
+      # - name: Log native platform info
+      #   run: |
+      #     python -c "import platform;print(platform.uname())"
+      #     python -c "import platform;print(platform.platform())"
+      #     python tools/macos_version.py
 
       - name: Build librtlsdr source
-        run: pipenv run python tools/get_releases.py --build-types source --macos-arch=$MACOS_ARCH
+        run: python tools/get_releases.py --build-types source --macos-arch=$MACOS_ARCH
         env:
           MACOS_ARCH: ${{ matrix.arch }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Test custom build
-        run: pipenv run py.test tests/test_custom_build.py
+        run: py.test tests/test_custom_build.py
         env:
           MACOS_ARCH: ${{ matrix.arch }}
 
       - name: Build macos wheel
-        run: pipenv run python -m build -w
+        run: python -m build -w
         env:
           PYRTLSDRLIB_PLATFORM: macos
           PYRTLSDRLIB_ARCH: ${{ matrix.arch }}
 
       - name: Rename wheel
         shell: python
-        if: ${{ matrix.arch == 'arm64' }}
+        env:
+          MACOS_ARCH: ${{ matrix.arch }}
         run: |
+          import os
+          mac_arch = os.getenv('MACOS_ARCH')
           import distutils.util
           os_version = distutils.util.get_macosx_target_ver().split('.')[0]
           from pathlib import Path
           dists = Path('dist')
-          arm_wheels = [p for p in dists.glob('*macosx*arm64.whl')]
-          assert len(arm_wheels) == 1, str(arm_wheels)
-          whl = arm_wheels[0]
+          orig_wheels = [p for p in dists.glob(f'*macosx*{mac_arch}.whl')]
+          print(f'Found wheels: {orig_wheels}')
+          assert len(orig_wheels) == 1, str(orig_wheels)
+          whl = orig_wheels[0]
           new_whl = whl.with_name(whl.name.replace(f'{os_version}_0', '11_0'))
-          print(f'{whl} > {new_whl}')
-          whl.rename(new_whl)
+          if new_whl.name == whl.name:
+              print(f'Wheel name already correct: {whl}')
+          else:
+              print(f'{whl} > {new_whl}')
+              whl.rename(new_whl)
 
       - name: Test wheel files
-        run: pipenv run py.test tests/test_wheel_files.py
+        run: py.test tests/test_wheel_files.py
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v6
         with:
-          name: 'dists'
+          name: 'dists-macos-${{ matrix.arch }}'
           path: 'dist/*'
 
 
   build-windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
       - name: Set up Python
-        uses: MatteoH2O1999/setup-python@v1
+        uses: actions/setup-python@v6
         with:
-          python-version: '3.10.12'
-          cache-build: true
-          cache: 'pipenv'
-      - name: Install pipenv
-        run: python -m pip install pipenv
+          python-version: '3.13'
       - name: Install dependencies
         run: |
-          pipenv lock
-          pipenv install --dev
+          python -m pip install -U pip
+          pip install pygithub requests loguru build json-object-factory click pytest build
+          pip install -e .
 
       - name: Get librtlsdr release
-        run: pipenv run python tools/get_releases.py --build-types windows --build-types w32 --build-types w64 --build-types static
+        run: python tools/get_releases.py --build-types windows --build-types w32 --build-types w64 --build-types static
 
       - name: Test build
-        run: pipenv run py.test tests/test_repo_build.py
+        run: python -m pytest tests/test_repo_build.py
 
       - name: Build win32 wheel
-        run: pipenv run python -m build -w
+        run: python -m build -w
         env:
           PYRTLSDRLIB_PLATFORM: windows
           PYRTLSDRLIB_ARCH: win32
 
       - name: Build win64 wheel
-        run: pipenv run python -m build -w
+        run: python -m build -w
         env:
           PYRTLSDRLIB_PLATFORM: windows
           PYRTLSDRLIB_ARCH: win64
 
       - name: Test wheel files
-        run: pipenv run py.test tests/test_wheel_files.py
+        run: py.test tests/test_wheel_files.py
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v6
         with:
-          name: 'dists'
+          name: 'dists-windows'
           path: 'dist/*'
 
   test:
@@ -204,25 +210,25 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-11, macos-12, macos-13, macos-14, windows-latest]
+        os: [ubuntu-latest, macos-15-intel, macos-latest, windows-latest]
         python-version: ["3.8", "3.9", "3.10", "3.11"]
     runs-on:
       ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         with:
           repository: pyrtlsdr/pyrtlsdr
 
       - name: Set up Python
-        uses: MatteoH2O1999/setup-python@v3
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
-          cache-build: true
       - name: Download artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v6
         with:
-          name: 'dists'
+          pattern: 'dists-*'
           path: dist
+          merge-multiple: true
 
       - name: Install dependencies
         run: |
@@ -246,9 +252,10 @@ jobs:
       id-token: write
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v6
         with:
-          name: 'dists'
+          pattern: 'dists-*'
           path: dist
+          merge-multiple: true
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
