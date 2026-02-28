@@ -106,7 +106,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install -U pip
+          python -m pip install -U pip setuptools
           pip install pygithub requests loguru build json-object-factory click pytest build
           pip install -e .
 
