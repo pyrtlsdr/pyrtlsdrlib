@@ -5,13 +5,13 @@ import traceback
 from pathlib import Path
 
 if sys.version_info < (3, 9):
-    import importlib_resources as importlib_resources
+    import importlib_resources
 else:
     import importlib.resources as importlib_resources
 
 
 def resource_filename(mod_name: str, filename: str) -> Path:
-    return cast(Path, importlib_resources.files(mod_name) / filename)
+    return Path(str(importlib_resources.files(mod_name) / filename))
 
 
 from pyrtlsdrlib import BuildType
