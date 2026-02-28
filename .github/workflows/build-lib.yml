@@ -23,9 +23,10 @@ jobs:
           - image-name: quay.io/pypa/manylinux_2_28_x86_64
             abi: manylinux_2_28
             pkg-mgr: dnf
-          - image-name: quay.io/pypa/manylinux2014_x86_64
-            abi: manylinux2014
-            pkg-mgr: yum
+          # TODO: manylinux2014 is currently broken due glibc version issues. We should fix this and re-enable the manylinux2014 build (if it's still relevant).
+          # - image-name: quay.io/pypa/manylinux2014_x86_64
+          #   abi: manylinux2014
+          #   pkg-mgr: yum
     runs-on:
       ubuntu-latest
     container:
