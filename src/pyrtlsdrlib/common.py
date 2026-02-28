@@ -21,6 +21,10 @@ class BuildType(enum.Flag):
     static = enum.auto()
     udpsrv = enum.auto()
 
+    # Alias linux to ubuntu since we're compiling from manylinux.
+    # This should probably be changed in the future to be more accurate.
+    linux = ubuntu
+
     all_os = macos | windows | ubuntu
 
     @classmethod
