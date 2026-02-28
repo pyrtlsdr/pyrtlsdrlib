@@ -141,10 +141,12 @@ jobs:
           MACOS_ARCH: ${{ matrix.arch }}
         run: |
           import os
-          mac_arch = os.getenv('MACOS_ARCH')
-          import distutils.util
-          os_version = distutils.util.get_macosx_target_ver().split('.')[0]
+          import sysconfig
           from pathlib import Path
+          mac_arch = os.getenv('MACOS_ARCH')
+          target = sysconfig.get_config_var('MACOSX_DEPLOYMENT_TARGET')
+          print(f'{mac_arch=}, {target=}')
+          os_version = target.split('.')[0]
           dists = Path('dist')
           orig_wheels = [p for p in dists.glob(f'*macosx*{mac_arch}.whl')]
           print(f'Found wheels: {orig_wheels}')
