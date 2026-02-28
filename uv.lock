@@ -740,6 +740,7 @@ build = [
     { name = "pygithub" },
     { name = "requests", version = "2.32.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
     { name = "requests", version = "2.32.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
+    { name = "standard-distutils", marker = "sys_platform == 'darwin'" },
 ]
 dev = [
     { name = "build", version = "1.2.2.post1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
@@ -754,6 +755,7 @@ dev = [
     { name = "pytest", version = "9.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "requests", version = "2.32.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
     { name = "requests", version = "2.32.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
+    { name = "standard-distutils", marker = "sys_platform == 'darwin'" },
 ]
 test = [
     { name = "pytest", version = "8.3.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
@@ -771,6 +773,7 @@ build = [
     { name = "loguru", specifier = ">=0.7.3" },
     { name = "pygithub", specifier = ">=2.8.1" },
     { name = "requests", specifier = ">=2.32.4" },
+    { name = "standard-distutils", marker = "sys_platform == 'darwin'", specifier = ">=3.11.9" },
 ]
 dev = [
     { name = "build", specifier = ">=1.2.2.post1" },
@@ -780,6 +783,7 @@ dev = [
     { name = "pygithub", specifier = ">=2.8.1" },
     { name = "pytest", specifier = ">=8.3.5" },
     { name = "requests", specifier = ">=2.32.4" },
+    { name = "standard-distutils", marker = "sys_platform == 'darwin'", specifier = ">=3.11.9" },
 ]
 test = [{ name = "pytest", specifier = ">=8.3.5" }]
 
@@ -880,6 +884,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/c9/74/b3ff8e6c8446842c3f5c837e9c3dfcfe2018ea6ecef224c710c85ef728f4/requests-2.32.5.tar.gz", hash = "sha256:dbba0bac56e100853db0ea71b82b4dfd5fe2bf6d3754a8893c3af500cec7d7cf", size = 134517, upload-time = "2025-08-18T20:46:02.573Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/1e/db/4254e3eabe8020b458f1a747140d32277ec7a271daf1d235b70dc0b4e6e3/requests-2.32.5-py3-none-any.whl", hash = "sha256:2462f94637a34fd532264295e186976db0f5d453d1cdd31473c85a6a161affb6", size = 64738, upload-time = "2025-08-18T20:46:00.542Z" },
+]
+
+[[package]]
+name = "standard-distutils"
+version = "3.11.9"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/a8/da/c33a5b982f16b41fbe400863d6124377623c33401c34c0814b8302b1c5d0/standard_distutils-3.11.9.tar.gz", hash = "sha256:37d6c9f0f0321ed3c9c923e54b0fdbafa3d7bf556821de55fd8158d7f440deb5", size = 209658, upload-time = "2024-10-30T02:06:21.49Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fc/1b/b8068593d405562f19ef8dd0b1858709db05fe44c9d25d1dbecc9e1666f8/standard_distutils-3.11.9-py3-none-any.whl", hash = "sha256:9ba3300167f1c95d5a24e9ac2eb323ad6cb146ec0bea703851a7720e8ffd7878", size = 259359, upload-time = "2024-10-30T02:06:19.595Z" },
 ]
 
 [[package]]

@@ -45,6 +45,7 @@ build = [
     "loguru>=0.7.3",
     "pygithub>=2.8.1",
     "requests>=2.32.4",
+    "standard-distutils>=3.11.9 ; sys_platform == 'darwin'",
 ]
 test = [
     "pytest>=8.3.5",
