@@ -110,11 +110,11 @@ jobs:
           pip install pygithub requests loguru build json-object-factory click pytest build
           pip install -e .
 
-      - name: Log native platform info
-        run: |
-          python -c "import platform;print(platform.uname())"
-          python -c "import platform;print(platform.platform())"
-          python tools/macos_version.py
+      # - name: Log native platform info
+      #   run: |
+      #     python -c "import platform;print(platform.uname())"
+      #     python -c "import platform;print(platform.platform())"
+      #     python tools/macos_version.py
 
       - name: Build librtlsdr source
         run: python tools/get_releases.py --build-types source --macos-arch=$MACOS_ARCH
