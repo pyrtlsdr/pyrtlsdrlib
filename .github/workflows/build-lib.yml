@@ -225,7 +225,7 @@ jobs:
           python-version: '3.13'
 
       - name: Export dev requirements
-        run: uv export --frozen --no-emit-project --only-group dev requirements-dev.txt
+        run: uv export --frozen --no-emit-project --only-group dev -o requirements-dev.txt
 
       - name: Export minimal requirements
         run: uv export --frozen --no-emit-project --no-default-groups --no-dev -o requirements.txt
