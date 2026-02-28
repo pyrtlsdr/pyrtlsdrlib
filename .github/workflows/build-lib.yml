@@ -98,11 +98,6 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: '3.13'
-      - name: Log native platform info
-        run: |
-          python -c "import platform;print(platform.uname())"
-          python -c "import platform;print(platform.platform())"
-          python tools/macos_version.py
       - name: Uninstall libusb
         continue-on-error: true
         run: brew uninstall --ignore-dependencies libusb
@@ -114,6 +109,12 @@ jobs:
           python -m pip install -U pip
           pip install pygithub requests loguru build json-object-factory click pytest build
           pip install -e .
+
+      - name: Log native platform info
+        run: |
+          python -c "import platform;print(platform.uname())"
+          python -c "import platform;print(platform.platform())"
+          python tools/macos_version.py
 
       - name: Build librtlsdr source
         run: python tools/get_releases.py --build-types source --macos-arch=$MACOS_ARCH
