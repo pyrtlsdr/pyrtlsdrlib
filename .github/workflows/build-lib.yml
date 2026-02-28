@@ -103,7 +103,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.13'
+          python-version: '3.14'
       - name: Uninstall libusb
         continue-on-error: true
         run: brew uninstall --ignore-dependencies libusb
@@ -180,7 +180,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.13'
+          python-version: '3.14'
       - name: Install dependencies
         run: uv sync --frozen --group build --group test
 
@@ -222,7 +222,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.13'
+          python-version: '3.14'
 
       - name: Export dev requirements
         run: uv export --frozen --no-emit-project --only-group dev -o requirements-dev.txt
