@@ -58,10 +58,16 @@ class JSONEncoder:
         else:
             the_class = obj
         if Path in the_class.mro() and the_class is not Path:
-            the_class = Path
+            # TODO: this is hardcoded for pathlib.Path due to changes in
+            # pathlib's internal structure. We should find a better way to handle this.
+            return 'pathlib.Path'
         return '.'.join([the_class.__module__, the_class.__name__])
     @classmethod
     def str_to_cls(cls, s):
+        # TODO: this is hardcoded for pathlib.Path due to changes in
+        # pathlib's internal structure. We should find a better way to handle this.
+        if s == 'pathlib.Path':
+            return Path
         for the_class in cls.classes:
             if cls.cls_to_str(the_class) == s:
                 return the_class
