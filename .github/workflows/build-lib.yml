@@ -29,7 +29,7 @@ jobs:
           #   abi: manylinux2014
           #   pkg-mgr: yum
     runs-on:
-      ubuntu-latest
+      blacksmith-2vcpu-ubuntu-2404
     container:
       image: ${{ matrix.image-name }}
     steps:
@@ -55,6 +55,44 @@ jobs:
         run: uv run python tools/get_releases.py --build-types source
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log build info
+        run: |
+          cat > tmpscript.py << 'EOF'
+          import platform
+          from pathlib import Path
+          from pyrtlsdrlib.platform import get_os_type
+          from pyrtlsdrlib.lib import get_library_files, resource_filename
+          from pyrtlsdrlib.lib import custom_build as CUSTOM_LIB_MODULE
+
+          print(f'{platform.platform()=}')
+          print(f'{platform.uname()=}')
+
+          os_type = get_os_type()
+          print(f'OS type: {os_type}')
+
+          custom_root = Path(resource_filename(CUSTOM_LIB_MODULE.__name__, ''))
+          print(f'Custom build root: {custom_root}')
+
+          all_lib_files = list(get_library_files())
+          print(f'All library files found:')
+          for f in all_lib_files:
+              print(f'  {f}')
+
+          custom_lib_files = [f for f in all_lib_files if f.parent == custom_root]
+          print(f'Custom build library files found:')
+          for f in custom_lib_files:
+              print(f'  {f}')
+          EOF
+          uv run python tmpscript.py
+
+
+      - name: Log build info shell
+        run: |
+          pwd
+          ls -alh src/pyrtlsdrlib/lib/custom_build/
+          cat src/pyrtlsdrlib/lib/custom_build/build-meta.json
+
       - name: Test custom build
         run: uv run pytest tests/test_custom_build.py
 
@@ -170,7 +208,7 @@ jobs:
 
 
   build-windows:
-    runs-on: windows-latest
+    runs-on: blacksmith-2vcpu-windows-2025
     steps:
       - uses: actions/checkout@v6
       - name: Install uv
@@ -216,7 +254,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-15-intel, macos-latest, windows-latest]
+        os: [blacksmith-2vcpu-ubuntu-2404, macos-15-intel, macos-latest, blacksmith-2vcpu-windows-2025]
         python-version: ["3.8", "3.9", "3.10", "3.11"]
     runs-on:
       ${{ matrix.os }}
@@ -253,7 +291,7 @@ jobs:
   deploy:
     needs: test
     if: ${{ success() && (github.event.inputs.allow_deploy == 'true') }}
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     permissions:
       id-token: write
     steps:
