@@ -57,8 +57,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Log build info
-        shell: python
         run: |
+          cat > tmpscript.py << 'EOF'
           from pathlib import Path
           from pyrtlsdrlib.lib import get_library_files, resource_filename
           from pyrtlsdrlib.lib import custom_build as CUSTOM_LIB_MODULE
@@ -71,11 +71,12 @@ jobs:
           for f in all_lib_files:
               print(f'  {f}')
 
-
           custom_lib_files = [f for f in all_lib_files if f.parent == custom_root]
           print(f'Custom build library files found:')
           for f in custom_lib_files:
               print(f'  {f}')
+          EOF
+          uv run python tmpscript.py
 
 
       - name: Log build info shell
