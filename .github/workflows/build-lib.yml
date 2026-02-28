@@ -29,7 +29,7 @@ jobs:
           #   abi: manylinux2014
           #   pkg-mgr: yum
     runs-on:
-      ubuntu-latest
+      blacksmith-2vcpu-ubuntu-2404
     container:
       image: ${{ matrix.image-name }}
     steps:
@@ -170,7 +170,7 @@ jobs:
 
 
   build-windows:
-    runs-on: windows-latest
+    runs-on: blacksmith-2vcpu-windows-2025
     steps:
       - uses: actions/checkout@v6
       - name: Install uv
@@ -216,7 +216,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-15-intel, macos-latest, windows-latest]
+        os: [blacksmith-2vcpu-ubuntu-2404, macos-15-intel, macos-latest, blacksmith-2vcpu-windows-2025]
         python-version: ["3.8", "3.9", "3.10", "3.11"]
     runs-on:
       ${{ matrix.os }}
@@ -253,7 +253,7 @@ jobs:
   deploy:
     needs: test
     if: ${{ success() && (github.event.inputs.allow_deploy == 'true') }}
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     permissions:
       id-token: write
     steps:
