@@ -55,6 +55,35 @@ jobs:
         run: uv run python tools/get_releases.py --build-types source
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log build info
+        shell: python
+        run: |
+          from pathlib import Path
+          from pyrtlsdrlib.lib import get_library_files, resource_filename
+          from pyrtlsdrlib.lib import custom_build as CUSTOM_LIB_MODULE
+
+          custom_root = Path(resource_filename(CUSTOM_LIB_MODULE.__name__, ''))
+          print(f'Custom build root: {custom_root}')
+
+          all_lib_files = list(get_library_files())
+          print(f'All library files found:')
+          for f in all_lib_files:
+              print(f'  {f}')
+
+
+          custom_lib_files = [f for f in all_lib_files if f.parent == custom_root]
+          print(f'Custom build library files found:')
+          for f in custom_lib_files:
+              print(f'  {f}')
+
+
+      - name: Log build info shell
+        run: |
+          pwd
+          ls -alh src/pyrtlsdrlib/lib/custom_build/
+          cat src/pyrtlsdrlib/lib/custom_build/build-meta.json
+
       - name: Test custom build
         run: uv run pytest tests/test_custom_build.py
 
