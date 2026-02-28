@@ -30,6 +30,9 @@ classifiers = [
     "Topic :: Software Development :: Libraries",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
+dependencies = [
+    "importlib-resources; python_version<'3.9'",
+]
 
 [project.urls]
 Homepage = "https://github.com/pyrtlsdr/pyrtlsdrlib"
