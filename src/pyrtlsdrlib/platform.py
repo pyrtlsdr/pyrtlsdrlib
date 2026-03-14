@@ -10,6 +10,7 @@ def get_os_type() -> BuildType:
             t = BuildType.ubuntu
             t |= uname.machine
             return t
+        return BuildType.linux
     elif uname.system == 'Darwin':
         return BuildType.macos
     elif uname.system == 'Windows':

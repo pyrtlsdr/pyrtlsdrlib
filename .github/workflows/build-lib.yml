@@ -16,24 +16,27 @@ jobs:
   build-linux:
     env:
       PY_PATH: '/opt/python/cp310-cp310/bin/python'
+      UV_PYTHON: '/opt/python/cp310-cp310/bin/python'
     strategy:
       fail-fast: false
       matrix:
         include:
-          - image-name: quay.io/pypa/manylinux_2_28_x86_64:2023-07-14-55e4124
+          - image-name: quay.io/pypa/manylinux_2_28_x86_64
             abi: manylinux_2_28
             pkg-mgr: dnf
-            arch: x86_64
-          - image-name: quay.io/pypa/manylinux2014_x86_64:2023-07-14-55e4124
-            abi: manylinux2014
-            pkg-mgr: yum
-            arch: x86_64
+          # TODO: manylinux2014 is currently broken due glibc version issues. We should fix this and re-enable the manylinux2014 build (if it's still relevant).
+          # - image-name: quay.io/pypa/manylinux2014_x86_64
+          #   abi: manylinux2014
+          #   pkg-mgr: yum
     runs-on:
-      ubuntu-latest
+      blacksmith-2vcpu-ubuntu-2404
     container:
       image: ${{ matrix.image-name }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
+
+      - name: Install UV
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
 
       - name: Show Platform Info
         run: |
@@ -41,27 +44,25 @@ jobs:
           ls -al /opt/python
           echo "python path: $PY_PATH"
           $PY_PATH -V
-          $PY_PATH -c "import distutils;print(distutils.util.get_platform())"
+          $PY_PATH -c "import platform;print(platform.platform())"
 
       - name: Install dependencies
         run: |
           ${{ matrix.pkg-mgr }} install -y libusbx-devel
-          $PY_PATH -m venv venv
-          ./venv/bin/python -m pip install pygithub requests loguru build json-object-factory click pytest
-          ./venv/bin/python -m pip install -e .
+          uv sync --frozen --group build --group test
 
       - name: Build librtlsdr source
-        run: ./venv/bin/python tools/get_releases.py --build-types source
+        run: uv run python tools/get_releases.py --build-types source
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Test custom build
-        run: ./venv/bin/python -m pytest tests/test_custom_build.py
+        run: uv run pytest tests/test_custom_build.py
 
       - name: Build wheel
-        run: ./venv/bin/python -m build -w
+        run: uv build --wheel
         env:
           PYRTLSDRLIB_PLATFORM: 'linux'
-          PYRTLSDRLIB_ARCH: ${{ matrix.arch }}
+          PYRTLSDRLIB_ARCH: 'x86_64'
 
       - name: Audit Wheel
         run: |
@@ -73,12 +74,12 @@ jobs:
           ls -alh wheelhouse
           rm dist/*
       - name: Test wheel files
-        run: ./venv/bin/python -m pytest tests/test_wheel_files.py
+        run: uv run pytest tests/test_wheel_files.py
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v7
         with:
-          name: 'dists'
+          name: 'dists-linux-${{ matrix.abi }}'
           path: 'wheelhouse/*'
 
   build-aarch64:
@@ -131,140 +132,189 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-11, macos-12]
-        arch: [x86_64, arm64]
+        include:
+          - os: macos-15-intel
+            arch: x86_64
+          - os: macos-latest
+            arch: arm64
     runs-on:
       ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python
-        uses: MatteoH2O1999/setup-python@v1
+      - uses: actions/checkout@v6
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
         with:
-          python-version: '3.10.12'
-          cache-build: true
-          cache: 'pipenv'
-      - name: Get macos info
-        id: macos-info
-        run: |
-          BOTTLE_TAG=$(python tools/macos_version.py --force-version ${{ matrix.os }})
-          echo "BOTTLE_TAG=${{ matrix.arch }}_${BOTTLE_TAG}"
-          echo "BOTTLE_TAG=${{ matrix.arch }}_${BOTTLE_TAG}" >> $GITHUB_OUTPUT
+          enable-cache: true
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
       - name: Uninstall libusb
         continue-on-error: true
         run: brew uninstall --ignore-dependencies libusb
       - name: Install libusb
-        run: |
-          brew fetch --force --bottle-tag $BOTTLE_TAG libusb
-          export BOTTLE_PATH=$(brew --cache --bottle-tag=$BOTTLE_TAG libusb)
-          brew install $BOTTLE_PATH
-        env:
-          BOTTLE_TAG: ${{ steps.macos-info.outputs.BOTTLE_TAG }}
+        run: brew install libusb
 
       - name: Install dependencies
-        run: |
-          python -m pip install pipenv
-          pipenv install --dev
+        run: uv sync --frozen --group build --group test
+
+      # - name: Log native platform info
+      #   run: |
+      #     python -c "import platform;print(platform.uname())"
+      #     python -c "import platform;print(platform.platform())"
+      #     python tools/macos_version.py
 
       - name: Build librtlsdr source
-        run: pipenv run python tools/get_releases.py --build-types source --macos-arch=$MACOS_ARCH
+        run: uv run python tools/get_releases.py --build-types source --macos-arch=$MACOS_ARCH
         env:
           MACOS_ARCH: ${{ matrix.arch }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Test custom build
-        run: pipenv run py.test tests/test_custom_build.py
+        run: uv run pytest tests/test_custom_build.py
         env:
           MACOS_ARCH: ${{ matrix.arch }}
 
       - name: Build macos wheel
-        run: pipenv run python -m build -w
+        run: uv build --wheel
         env:
           PYRTLSDRLIB_PLATFORM: macos
           PYRTLSDRLIB_ARCH: ${{ matrix.arch }}
 
+      - name: Rename wheel
+        shell: python
+        env:
+          MACOS_ARCH: ${{ matrix.arch }}
+        run: |
+          import os
+          import sysconfig
+          from pathlib import Path
+          mac_arch = os.getenv('MACOS_ARCH')
+          target = sysconfig.get_config_var('MACOSX_DEPLOYMENT_TARGET')
+          print(f'{mac_arch=}, {target=}')
+          os_version = target.split('.')[0]
+          dists = Path('dist')
+          orig_wheels = [p for p in dists.glob(f'*macosx*{mac_arch}.whl')]
+          print(f'Found wheels: {orig_wheels}')
+          assert len(orig_wheels) == 1, str(orig_wheels)
+          whl = orig_wheels[0]
+          new_whl = whl.with_name(whl.name.replace(f'{os_version}_0', '11_0'))
+          if new_whl.name == whl.name:
+              print(f'Wheel name already correct: {whl}')
+          else:
+              print(f'{whl} > {new_whl}')
+              whl.rename(new_whl)
+
       - name: Test wheel files
-        run: pipenv run py.test tests/test_wheel_files.py
+        run: uv run pytest tests/test_wheel_files.py
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v7
         with:
-          name: 'dists'
+          name: 'dists-macos-${{ matrix.arch }}'
           path: 'dist/*'
 
 
   build-windows:
-    runs-on: windows-latest
+    runs-on: blacksmith-2vcpu-windows-2025
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python
-        uses: MatteoH2O1999/setup-python@v1
+      - uses: actions/checkout@v6
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
         with:
-          python-version: '3.10.12'
-          cache-build: true
-          cache: 'pipenv'
-      - name: Install pipenv
-        run: python -m pip install pipenv
+          enable-cache: true
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
       - name: Install dependencies
-        run: |
-          pipenv lock
-          pipenv install --dev
+        run: uv sync --frozen --group build --group test
 
       - name: Get librtlsdr release
-        run: pipenv run python tools/get_releases.py --build-types windows --build-types w32 --build-types w64 --build-types static
+        run: uv run python tools/get_releases.py --build-types windows --build-types w32 --build-types w64 --build-types static
 
       - name: Test build
-        run: pipenv run py.test tests/test_repo_build.py
+        run: uv run pytest tests/test_repo_build.py
 
       - name: Build win32 wheel
-        run: pipenv run python -m build -w
+        run: uv build --wheel
         env:
           PYRTLSDRLIB_PLATFORM: windows
           PYRTLSDRLIB_ARCH: win32
 
       - name: Build win64 wheel
-        run: pipenv run python -m build -w
+        run: uv build --wheel
         env:
           PYRTLSDRLIB_PLATFORM: windows
           PYRTLSDRLIB_ARCH: win64
 
       - name: Test wheel files
-        run: pipenv run py.test tests/test_wheel_files.py
+        run: uv run pytest tests/test_wheel_files.py
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v7
         with:
-          name: 'dists'
+          name: 'dists-windows'
           path: 'dist/*'
 
+  create-pylockfiles:
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+
+      - name: Export dev requirements
+        run: uv export --frozen --no-emit-project --only-group dev -o requirements-dev.txt
+
+      - name: Export minimal requirements
+        run: uv export --frozen --no-emit-project --no-default-groups --no-dev -o requirements.txt
+
+      - name: Upload pylockfiles
+        uses: actions/upload-artifact@v7
+        with:
+          name: 'pylockfiles'
+          path: 'requirements*.txt'
+
   test:
-    needs: [build-linux, build-macos, build-windows]
+    needs: [create-pylockfiles, build-linux, build-macos, build-windows]
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-11, macos-12, macos-13, windows-latest]
+        os: [blacksmith-2vcpu-ubuntu-2404, macos-15-intel, macos-latest, blacksmith-2vcpu-windows-2025]
         python-version: ["3.8", "3.9", "3.10", "3.11"]
-    # TODO:  Disable this once macos-13 exits "beta"
-    continue-on-error: ${{ matrix.os == 'macos-13' }}
     runs-on:
       ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         with:
           repository: pyrtlsdr/pyrtlsdr
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+      - name: Set up Python
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
-
       - name: Download artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v8
         with:
-          name: 'dists'
+          pattern: 'dists-*'
           path: dist
+          merge-multiple: true
+
+      - name: Download pylockfiles
+        uses: actions/download-artifact@v8
+        with:
+          name: 'pylockfiles'
 
       - name: Install dependencies
         run: |
           python -m pip install -U pip
+          pip install -r requirements.txt
 
       - name: Install pyrtlsdrlib from wheel
         run: pip install --no-index --find-links dist pyrtlsdrlib
@@ -315,14 +365,15 @@ jobs:
   deploy:
     needs: [test, test-aarch64]
     if: ${{ success() && (github.event.inputs.allow_deploy == 'true') }}
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     permissions:
       id-token: write
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v8
         with:
-          name: 'dists'
+          pattern: 'dists-*'
           path: dist
+          merge-multiple: true
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
