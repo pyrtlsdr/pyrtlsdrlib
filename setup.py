@@ -79,7 +79,8 @@ else:
                 elif OS_TYPE == 'win64':
                     oses = 'win_amd64'
             elif OS_TYPE == 'linux':
-                oses = 'linux_x86_64'
+                arch = get_os_arch()
+                oses = f'linux_{arch}'
             if oses is None:
                 oses = 'any'
             return 'py3', 'none', oses

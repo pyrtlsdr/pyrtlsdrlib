@@ -20,7 +20,7 @@ from . import custom_build
 
 BUILD_TYPE_LIB_GLOBS = {
     BuildType.macos: '*.dylib',
-    BuildType.ubuntu: 'librtlsdr.so*',
+    BuildType.linux: 'librtlsdr.so*',
     BuildType.windows | BuildType.w32: 'librtlsdr_w32*.dll',
     BuildType.windows | BuildType.w64: 'librtlsdr_w64*.dll',
 }
@@ -28,6 +28,8 @@ BUILD_TYPE_LIB_GLOBS = {
 def iter_library_files():
     os_type = get_os_type()
     lib_glob = BUILD_TYPE_LIB_GLOBS.get(os_type)
+    if BuildType.linux in os_type:
+        lib_glob = BUILD_TYPE_LIB_GLOBS[BuildType.linux]
     if lib_glob is not None:
         for lib_pkg in (custom_build.__name__, __name__):
             lib_dir = Path(resource_filename(lib_pkg, ''))

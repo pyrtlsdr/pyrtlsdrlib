@@ -7,9 +7,9 @@ Description
 A helper for `pyrtlsdr`_ that includes pre-built binaries of `librtlsdr`_
 (which pyrtlsdr depends on).
 
-Contains libraries build for the following systems:
+Contains libraries built for the following systems:
 
-- Ubuntu Linux
+- Ubuntu Linux (x86_64 and aarch64)
 - Mac OSX (Intel)
 - Mac OSX (M1 / arm64)
 - Windows (32 and 64 bit)
