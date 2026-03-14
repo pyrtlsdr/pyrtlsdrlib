@@ -24,12 +24,19 @@ jobs:
           - image-name: quay.io/pypa/manylinux_2_28_x86_64
             abi: manylinux_2_28
             pkg-mgr: dnf
+            arch: x86_64
+            runner: blacksmith-2vcpu-ubuntu-2404
           # TODO: manylinux2014 is currently broken due glibc version issues. We should fix this and re-enable the manylinux2014 build (if it's still relevant).
           # - image-name: quay.io/pypa/manylinux2014_x86_64
           #   abi: manylinux2014
           #   pkg-mgr: yum
+          - image-name: quay.io/pypa/manylinux_2_28_aarch64
+            abi: manylinux_2_28
+            pkg-mgr: dnf
+            arch: aarch64
+            runner: blacksmith-2vcpu-ubuntu-2404-arm
     runs-on:
-      blacksmith-2vcpu-ubuntu-2404
+      ${{ matrix.runner }}
     container:
       image: ${{ matrix.image-name }}
     steps:
@@ -62,7 +69,7 @@ jobs:
         run: uv build --wheel
         env:
           PYRTLSDRLIB_PLATFORM: 'linux'
-          PYRTLSDRLIB_ARCH: 'x86_64'
+          PYRTLSDRLIB_ARCH: ${{ matrix.arch }}
 
       - name: Audit Wheel
         run: |
@@ -79,7 +86,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: 'dists-linux-${{ matrix.abi }}'
+          name: 'dists-linux-${{ matrix.arch }}-${{ matrix.abi }}'
           path: 'wheelhouse/*'
 
 
