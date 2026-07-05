@@ -254,12 +254,16 @@ jobs:
           - macos-15-intel
           - macos-latest
           - blacksmith-2vcpu-windows-2025
-        python-version: ["3.10", "3.11"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+
+        # Note: The Github-hosted Ubuntu runners are here to ensure compatibility with
+        # generic linux (blacksmith) and ubuntu platforms (github).  See PR #17.
+        # The github-hosted runners should always target the latest python versions.
         include:
           - os: ubuntu-latest
-            python-version: "3.11"
+            python-version: "3.14"
           - os: ubuntu-24.04-arm
-            python-version: "3.11"
+            python-version: "3.14"
     runs-on:
       ${{ matrix.os }}
     steps:
