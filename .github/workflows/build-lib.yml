@@ -3,8 +3,24 @@ name: Build librtlsdr
 on:
   push:
     branches: ['main']
+    paths:
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - 'setup.py'
+      - 'src/**'
+      - 'tools/**'
+      - 'tests/**'
+      - '.github/workflows/build-lib.yml'
   pull_request:
     branches: ['main']
+    paths:
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - 'setup.py'
+      - 'src/**'
+      - 'tools/**'
+      - 'tests/**'
+      - '.github/workflows/build-lib.yml'
   workflow_dispatch:
     inputs:
       allow_deploy:
