@@ -82,6 +82,12 @@ class Builder:
         if OS_TYPE == BuildType.macos and self.macos_arch is not None:
             logger.success('adding OSX_ARCHITECTURES')
             cmake_args = f'{cmake_args} -DCMAKE_OSX_ARCHITECTURES="{self.macos_arch}"'
+        if OS_TYPE & BuildType.ubuntu:
+            # musl libc (Alpine / musllinux) does not implement timelocal(),
+            # used by convenience.c. It's a glibc/BSD-only obsolete synonym
+            # for mktime() (identical signature and behavior), so redirect
+            # the one call via the preprocessor instead of patching the source.
+            cmake_args = f'{cmake_args} -DCMAKE_C_FLAGS="-Dtimelocal=mktime"'
         sh(f'cmake {cmake_args} -S {self.source_dir} -B {self.cmake_build_dir}')
         logger.debug(f'chdir to {self.cmake_build_dir}')
         os.chdir(self.cmake_build_dir)
