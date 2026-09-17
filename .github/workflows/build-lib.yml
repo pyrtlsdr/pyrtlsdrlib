@@ -41,7 +41,7 @@ jobs:
             abi: manylinux_2_28
             install-cmd: dnf install -y libusbx-devel
             arch: x86_64
-            runner: blacksmith-2vcpu-ubuntu-2404
+            runner: ubuntu-24.04
           # TODO: manylinux2014 is currently broken due glibc version issues. We should fix this and re-enable the manylinux2014 build (if it's still relevant).
           # - image-name: quay.io/pypa/manylinux2014_x86_64
           #   abi: manylinux2014
@@ -50,7 +50,7 @@ jobs:
             abi: manylinux_2_28
             install-cmd: dnf install -y libusbx-devel
             arch: aarch64
-            runner: blacksmith-2vcpu-ubuntu-2404-arm
+            runner: ubuntu-24.04-arm
           - image-name: quay.io/pypa/musllinux_1_2_x86_64
             abi: musllinux_1_2
             install-cmd: apk add --no-cache libusb-dev
@@ -240,7 +240,7 @@ jobs:
           path: 'dist/*'
 
   create-pylockfiles:
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Install uv
@@ -270,8 +270,8 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - blacksmith-2vcpu-ubuntu-2404
-          - blacksmith-2vcpu-ubuntu-2404-arm
+          - ubuntu-24.04
+          - ubuntu-24.04-arm
           - macos-15-intel
           - macos-latest
           - blacksmith-2vcpu-windows-2025
@@ -365,7 +365,7 @@ jobs:
   deploy:
     needs: [test, test-musllinux]
     if: ${{ success() && (github.event.inputs.allow_deploy == 'true') }}
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     permissions:
       id-token: write
     steps:
