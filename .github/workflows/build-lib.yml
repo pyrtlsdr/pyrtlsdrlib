@@ -39,18 +39,23 @@ jobs:
         include:
           - image-name: quay.io/pypa/manylinux_2_28_x86_64
             abi: manylinux_2_28
-            pkg-mgr: dnf
+            install-cmd: dnf install -y libusbx-devel
             arch: x86_64
             runner: blacksmith-2vcpu-ubuntu-2404
           # TODO: manylinux2014 is currently broken due glibc version issues. We should fix this and re-enable the manylinux2014 build (if it's still relevant).
           # - image-name: quay.io/pypa/manylinux2014_x86_64
           #   abi: manylinux2014
-          #   pkg-mgr: yum
+          #   install-cmd: yum install -y libusbx-devel
           - image-name: quay.io/pypa/manylinux_2_28_aarch64
             abi: manylinux_2_28
-            pkg-mgr: dnf
+            install-cmd: dnf install -y libusbx-devel
             arch: aarch64
             runner: blacksmith-2vcpu-ubuntu-2404-arm
+          - image-name: quay.io/pypa/musllinux_1_2_x86_64
+            abi: musllinux_1_2
+            install-cmd: apk add --no-cache libusb-dev
+            arch: x86_64
+            runner: blacksmith-2vcpu-ubuntu-2404
     runs-on:
       ${{ matrix.runner }}
     container:
@@ -71,7 +76,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          ${{ matrix.pkg-mgr }} install -y libusbx-devel
+          ${{ matrix.install-cmd }}
           uv sync --frozen --group build --group test
 
       - name: Build librtlsdr source
@@ -318,8 +323,47 @@ jobs:
         run: python -c 'import rtlsdr;'
 
 
+  test-musllinux:
+    needs: [build-linux]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image-name: quay.io/pypa/musllinux_1_2_x86_64
+            runner: blacksmith-2vcpu-ubuntu-2404
+    runs-on:
+      ${{ matrix.runner }}
+    container:
+      image: ${{ matrix.image-name }}
+    env:
+      PY_PATH: '/opt/python/cp310-cp310/bin/python'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: pyrtlsdr/pyrtlsdr
+
+      - name: Install runtime dependency
+        run: apk add --no-cache libusb
+
+      - name: Download artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          pattern: 'dists-linux-*-musllinux*'
+          path: dist
+          merge-multiple: true
+
+      - name: Install pyrtlsdrlib from wheel
+        run: $PY_PATH -m pip install --no-index --find-links dist pyrtlsdrlib
+
+      - name: Install pyrtlsdr
+        run: $PY_PATH -m pip install -e .
+
+      - name: Test rtlsdr import
+        run: $PY_PATH -c 'import rtlsdr;'
+
+
   deploy:
-    needs: test
+    needs: [test, test-musllinux]
     if: ${{ success() && (github.event.inputs.allow_deploy == 'true') }}
     runs-on: blacksmith-2vcpu-ubuntu-2404
     permissions:
