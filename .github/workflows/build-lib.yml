@@ -30,6 +30,7 @@ on:
 
 jobs:
   build-linux:
+    name: build-linux ${{ matrix.abi }}-${{ matrix.arch }}
     env:
       PY_PATH: '/opt/python/cp310-cp310/bin/python'
       UV_PYTHON: '/opt/python/cp310-cp310/bin/python'
