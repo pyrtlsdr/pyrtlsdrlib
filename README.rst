@@ -39,6 +39,7 @@ A helper for `pyrtlsdr`_ that includes pre-built binaries of `librtlsdr`_
 Contains libraries built for the following systems:
 
 - Ubuntu Linux (x86_64 and aarch64)
+- Alpine Linux / musl (x86_64)
 - Mac OSX (Intel)
 - Mac OSX (M1 / arm64)
 - Windows (32 and 64 bit)
