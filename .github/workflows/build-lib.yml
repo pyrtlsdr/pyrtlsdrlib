@@ -326,16 +326,9 @@ jobs:
 
   test-musllinux:
     needs: [build-linux]
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - image-name: quay.io/pypa/musllinux_1_2_x86_64
-            runner: blacksmith-2vcpu-ubuntu-2404
-    runs-on:
-      ${{ matrix.runner }}
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     container:
-      image: ${{ matrix.image-name }}
+      image: quay.io/pypa/musllinux_1_2_x86_64
     env:
       PY_PATH: '/opt/python/cp310-cp310/bin/python'
     steps:
