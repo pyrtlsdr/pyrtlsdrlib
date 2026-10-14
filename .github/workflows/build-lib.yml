@@ -111,7 +111,7 @@ jobs:
         run: uv run pytest tests/test_wheel_files.py
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: 'dists-linux-${{ matrix.arch }}-${{ matrix.abi }}'
           path: 'wheelhouse/*'
@@ -199,7 +199,7 @@ jobs:
         run: uv run pytest tests/test_wheel_files.py
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: 'dists-macos-${{ matrix.arch }}'
           path: 'dist/*'
@@ -244,7 +244,7 @@ jobs:
         run: uv run pytest tests/test_wheel_files.py
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: 'dists-windows'
           path: 'dist/*'
@@ -271,7 +271,7 @@ jobs:
         run: uv export --frozen --no-emit-project --no-default-groups --no-dev -o requirements.txt
 
       - name: Upload pylockfiles
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: 'pylockfiles'
           path: 'requirements*.txt'
@@ -310,14 +310,14 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Download artifacts
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           pattern: 'dists-*'
           path: dist
           merge-multiple: true
 
       - name: Download pylockfiles
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: 'pylockfiles'
 
@@ -353,7 +353,7 @@ jobs:
         run: apk add --no-cache libusb
 
       - name: Download artifacts
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           pattern: 'dists-linux-*-musllinux*'
           path: dist
@@ -377,7 +377,7 @@ jobs:
       id-token: write
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           pattern: 'dists-*'
           path: dist
