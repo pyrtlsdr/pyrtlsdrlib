@@ -139,7 +139,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
-          python-version: '3.14'
+          python-version: '3.15'
       - name: Uninstall libusb
         continue-on-error: true
         run: brew uninstall --ignore-dependencies libusb
@@ -218,7 +218,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
-          python-version: '3.14'
+          python-version: '3.15'
       - name: Install dependencies
         run: uv sync --frozen --group build --group test
 
@@ -262,7 +262,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
-          python-version: '3.14'
+          python-version: '3.15'
 
       - name: Export dev requirements
         run: uv export --frozen --no-emit-project --only-group dev -o requirements-dev.txt
